@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:developer' as developer;
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +14,7 @@ class User {
   User(this.username, this.token);
 }
 
-class CurrentUserProvider extends ChangeNotifier {
+class CurrentUser extends ChangeNotifier {
   User? _user;
 
   User get user {
@@ -26,7 +26,7 @@ class CurrentUserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  CurrentUserProvider() {
+  CurrentUser() {
     try {
       _loadSavedUser();
     } catch (ex) {
