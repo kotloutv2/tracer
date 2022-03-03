@@ -7,7 +7,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("RVMS"),
+          title: const Text('RVMS'),
           centerTitle: true,
         ),
         drawer: Drawer(
@@ -15,28 +15,28 @@ class HomePage extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: const [
             DrawerHeader(
-              child: Text("Drawer"),
+              child: Text('Drawer'),
             ),
             ListTile(
-              title: Text("Sync"),
+              title: Text('Sync'),
             ),
             ListTile(
-              title: Text("Heartrate"),
+              title: Text('Heartrate'),
             ),
             ListTile(
-              title: Text("SpO2"),
+              title: Text('SpO2'),
             ),
             ListTile(
-              title: Text("Temperature"),
+              title: Text('Temperature'),
             ),
             ListTile(
-              title: Text("Device Info"),
+              title: Text('Device Info'),
             ),
             ListTile(
-              title: Text("Log Out"),
+              title: Text('Log Out'),
             )
           ],
         )),
-        body: const Text("Hi"));
+        body: const Text('Hi'));
   }
 }

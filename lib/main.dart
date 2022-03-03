@@ -1,61 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import 'models/data.dart';
-import 'models/user.dart';
-import 'views/home.dart';
-import 'views/login.dart';
+import 'model/user.dart';
+import 'view/home.dart';
+import 'view/login.dart';
 
 void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => CurrentUser()),
-        ChangeNotifierProvider(create: (context) => DataStore()),
-      ],
-      child: const App(),
-    ),
-  );
+  runApp(const ProviderScope(
+    child: App(),
+  ));
 }
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({Key? key}) : super(key: key);
 
-  Route? _appRoutes(RouteSettings settings) {
-    // Handle '/login'
-    if (settings.name == "/login") {
-      return MaterialPageRoute(builder: (context) => const LoginRegisterPage());
-    }
-
-    // Handle '/register'
-    if (settings.name == "/register") {
-      return MaterialPageRoute(
-          builder: (context) => const LoginRegisterPage(
-                isLogin: false,
-              ));
-    }
-
-    // Handle '/details/:id'
-    // var uri = Uri.parse(settings.name);
-    // if (uri.pathSegments.length == 2 && uri.pathSegments.first == 'details') {
-    //   var id = uri.pathSegments[1];
-    //   return MaterialPageRoute(builder: (context) => DetailScreen(id: id));
-    // }
-
-    // return MaterialPageRoute(builder: (context) => UnknownScreen());
-
-    // If unknown URL, return homepage.
-    return MaterialPageRoute(builder: (context) => const HomePage());
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final _router = GoRouter(initialLocation: '/', routes: [
+      GoRoute(
+          name: 'home',
+          path: '/',
+          builder: (context, state) => const HomePage(),
+          redirect: (state) {
+            var currentUser = ref.read(currentUserProvider);
+
+            if (currentUser.user == null) {
+              return state.namedLocation('login');
+            }
+
+            return null;
+          }),
+      GoRoute(
+          name: 'login',
+          path: '/login',
+          builder: (context, state) => LoginRegisterPage(
+                isLogin: true,
+              )),
+      GoRoute(
+          name: 'register',
+          path: '/register',
+          builder: (context, state) => LoginRegisterPage(
+                isLogin: false,
+              )),
+    ]);
+
+    return MaterialApp.router(
       title: 'RVMS Tracer',
-      theme: ThemeData(
-        primarySwatch: Colors.pink,
-      ),
-      onGenerateRoute: _appRoutes,
+      theme: ThemeData.dark(),
+      routeInformationParser: _router.routeInformationParser,
+      routerDelegate: _router.routerDelegate,
     );
   }
 }

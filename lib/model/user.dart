@@ -1,24 +1,29 @@
-import 'package:flutter/foundation.dart';
-import 'dart:developer' as developer;
+import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+final currentUserProvider = Provider<CurrentUser>((ref) => CurrentUser());
+
+enum UserType { admin, patient }
 
 class User {
   String username;
+  UserType type;
 
   String token;
 
-  String? email;
   String? name;
 
-  User(this.username, this.token);
+  User(this.username, this.token, this.type);
 }
 
 class CurrentUser extends ChangeNotifier {
   User? _user;
 
-  User get user {
-    return _user as User;
+  User? get user {
+    return _user;
   }
 
   set user(User? user) {
@@ -30,8 +35,7 @@ class CurrentUser extends ChangeNotifier {
     try {
       _loadSavedUser();
     } catch (ex) {
-      developer.log("Loading user from storage failed.",
-          name: "tracer.user.constructor");
+      log('Loading user from storage failed.', name: 'tracer.user.constructor');
     }
   }
 
@@ -45,12 +49,11 @@ class CurrentUser extends ChangeNotifier {
 
       await SharedPreferences.getInstance().then((prefs) async {
         var futures = [
-          prefs.setString("username", user.username),
-          prefs.setString("token", user.token)
+          prefs.setString('username', user.username),
+          prefs.setString('token', user.token)
         ];
 
-        futures.add(prefs.setString("email", user.email ?? ""));
-        futures.add(prefs.setString("name", user.name ?? ""));
+        futures.add(prefs.setString('name', user.name ?? ''));
 
         await Future.wait(futures);
       });
@@ -59,15 +62,16 @@ class CurrentUser extends ChangeNotifier {
 
   void logIn(String username, String password) {
     try {
-      // TODO: Try to log in.
-      _user = User("asd", "asd");
+      if (username == 'asd' && password == 'asd') {
+        _user = User(username, password, UserType.admin);
+      }
 
       _saveUser();
     } catch (ex) {
-      developer.log("Logging in to user $username failed.",
-          name: "tracer.user.constructor");
+      log('Logging in to user $username failed.',
+          name: 'tracer.user.constructor');
 
-      throw Exception("Could not log in.");
+      throw Exception('Could not log in.');
     }
   }
 
@@ -77,10 +81,10 @@ class CurrentUser extends ChangeNotifier {
 
       await SharedPreferences.getInstance().then((prefs) async {
         await Future.wait([
-          prefs.remove("username"),
-          prefs.remove("token"),
-          prefs.remove("email"),
-          prefs.remove("name")
+          prefs.remove('username'),
+          prefs.remove('token'),
+          prefs.remove('email'),
+          prefs.remove('name')
         ]);
 
         user = null;

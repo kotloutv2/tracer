@@ -2,3 +2,10 @@ include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
+    unsafe_html: true
+    avoid_slow_async_io: true
+    always_declare_return_types: true
+    omit_local_variable_types: true
+    prefer_single_quotes: true
+    sort_child_properties_last: true
+    unawaited_futures: true
