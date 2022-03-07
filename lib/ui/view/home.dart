@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatelessWidget {
   final bool isConnected = true;
@@ -129,7 +130,7 @@ class HomePage extends StatelessWidget {
         ),
         child: InkWell(
           onTap: () {
-            Navigator.pushNamed(context, '/graph');
+            context.push('/graph');
           },
           child: items[index],
         ));
