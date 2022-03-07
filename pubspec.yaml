@@ -21,6 +21,7 @@ dependencies:
   flutter_reactive_ble: ^5.0.2
   payload:
     git: https://github.com/rvms-capstone/payload.git
+  charts_flutter: ^0.12.0
 
 dev_dependencies:
   flutter_test:
