@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'model/user.dart';
 import 'view/home.dart';
+import 'view/graph.dart';
 import 'view/login.dart';
 
 void main() {
@@ -21,13 +22,14 @@ class App extends ConsumerWidget {
       GoRoute(
           name: 'home',
           path: '/',
-          builder: (context, state) => const HomePage(),
+          builder: (context, state) => const GraphPage(),
+          /* builder: (context, state) => const HomePage(), */
           redirect: (state) {
             var currentUser = ref.read(currentUserProvider);
 
-            if (currentUser.user == null) {
-              return state.namedLocation('login');
-            }
+            /* if (currentUser.user == null) { */
+            /*   return state.namedLocation('login'); */
+            /* } */
 
             return null;
           }),
