@@ -19,6 +19,8 @@ dependencies:
   flutter_svg: ^1.0.3
   email_validator: ^2.0.1
   flutter_reactive_ble: ^5.0.2
+  payload:
+    git: https://github.com/rvms-capstone/payload.git
 
 dev_dependencies:
   flutter_test:
