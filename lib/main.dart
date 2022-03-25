@@ -1,36 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import 'model/data.dart';
 import 'model/user.dart';
 import 'view/home.dart';
 import 'view/login.dart';
 
 void main() {
-  runApp(const ProviderScope(
-    child: App(),
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<CurrentUser>(create: (_) => CurrentUser()),
+      Provider<DataStore>(create: (_) => DataStore())
+    ],
+    child: const App(),
   ));
 }
 
-class App extends ConsumerWidget {
+class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final _router = GoRouter(initialLocation: '/', routes: [
       GoRoute(
-          name: 'home',
-          path: '/',
-          builder: (context, state) => const HomePage(),
-          redirect: (state) {
-            var currentUser = ref.read(currentUserProvider);
+        name: 'home',
+        path: '/',
+        builder: (context, state) => const HomePage(),
+        // redirect: (state) {
+        //   var currentUser = context.read<CurrentUser>();
 
-            if (currentUser.user == null) {
-              return state.namedLocation('login');
-            }
+        //   if (currentUser.user == null) {
+        //     return state.namedLocation('home');
+        //   }
 
-            return null;
-          }),
+        //   return null;
+        // }
+      ),
       GoRoute(
           name: 'login',
           path: '/login',

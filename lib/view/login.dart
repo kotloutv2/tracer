@@ -1,5 +1,4 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,7 +10,7 @@ class LoginRegisterPage extends StatelessWidget {
   final _minPasswordLength = 8;
   final _maxPasswordLength = 71;
 
-  final _maxUsernameLength = 254;
+  final _maxEmailLength = 254;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -19,15 +18,15 @@ class LoginRegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var usernameFormField = TextFormField(
-      maxLength: _maxUsernameLength,
-      decoration: const InputDecoration(labelText: 'Username'),
-      validator: (username) {
-        if (username == null) {
+    var emailFormField = TextFormField(
+      maxLength: _maxEmailLength,
+      decoration: const InputDecoration(labelText: 'Email'),
+      validator: (email) {
+        if (email == null) {
           return 'Please enter an email';
         }
 
-        return EmailValidator.validate(username)
+        return EmailValidator.validate(email)
             ? 'Please enter a valid email'
             : null;
       },
@@ -60,15 +59,11 @@ class LoginRegisterPage extends StatelessWidget {
 
     var saveButton = ElevatedButton(
         onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Logging In')),
-            );
-          }
+          if (_formKey.currentState!.validate()) {}
         },
         child: const Text('Submit'));
 
-    var loginInputWidgets = [usernameFormField, passwordFormField, saveButton];
+    var loginInputWidgets = [emailFormField, passwordFormField, saveButton];
     var registerInputWidgets = [nameFormField, ...loginInputWidgets];
 
     var inputWidgets =
@@ -107,7 +102,7 @@ class LoginRegisterPage extends StatelessWidget {
                     onPressed: () {
                       context.go(context.namedLocation('login'));
                     },
-                    child: const Text('Log in instead'))
+                    child: const Text('Log in instead.'))
           ]),
     ));
   }
