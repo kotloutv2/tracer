@@ -55,12 +55,12 @@ class HomePage extends StatelessWidget {
               onTap: () {
                 showDialog(
                     context: context,
-                    builder: (BuildContext context) => new AlertDialog(
-                          title: new Text('Debug Info'),
-                          content: new Text('Stats are for nerds'),
+                    builder: (BuildContext context) => AlertDialog(
+                          title: const Text('Debug Info'),
+                          content: const Text('Stats are for nerds'),
                           actions: <Widget>[
-                            new IconButton(
-                                icon: new Icon(Icons.close),
+                            IconButton(
+                                icon: const Icon(Icons.close),
                                 onPressed: () {
                                   Navigator.pop(context);
                                 })
@@ -97,7 +97,7 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   currentVitalsWidget,
-                  Divider(),
+                  const Divider(),
                   SizedBox(
                       height: 150,
                       child: ListView.separated(
