@@ -2,35 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../model/api.dart';
 
-enum UserRole { patient, admin }
-
-class User {
-  String email;
-  String? password;
-  String name;
-
-  UserRole? role;
-
-  User({required this.email, this.password, required this.name, this.role});
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    UserRole _role;
-
-    if (json['role'] == 0) {
-      _role = UserRole.patient;
-    } else {
-      _role = UserRole.admin;
-    }
-
-    return User(
-        email: json['email'],
-        password: json['password'],
-        name: json['name'],
-        role: _role);
-  }
-}
+import '../models/user.dart';
+import 'api.dart';
 
 class CurrentUser extends ChangeNotifier {
   User? _user;

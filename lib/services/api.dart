@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:tracer/model/user.dart';
+
+import '../models/user.dart';
 
 const _serverBaseUri = 'https://bastion.azurewebsites.net';
 

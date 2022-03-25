@@ -1,14 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum VitalsType { ppg, skinTemperature1, skinTemperature2 }
-
-class DataPacket {
-  final DateTime timestamp;
-  final double value;
-  final VitalsType type;
-
-  const DataPacket(this.timestamp, this.value, this.type);
-}
+import '../models/datapacket.dart';
 
 class DataStore extends ChangeNotifier {
   final List<DataPacket> _notUploadedCache = [];

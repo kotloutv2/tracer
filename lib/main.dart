@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'model/data.dart';
-import 'model/user.dart';
-import 'view/home.dart';
-import 'view/login.dart';
+import 'services/currentuser.dart';
+import 'services/datastore.dart';
+import 'ui/view/home.dart';
+import 'ui/view/login.dart';
 
 void main() {
   runApp(MultiProvider(
