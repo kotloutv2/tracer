@@ -52,44 +52,44 @@ class HomePage extends StatelessWidget {
             const Divider(),
             //InkWell(
             GestureDetector(
-            onTap: () {
-              showDialog(
-              context: context,
-              builder: (BuildContext context) => new AlertDialog(
-                title: new Text('Debug Info'),
-                content: new Text('Stats are for nerds'),
-                actions: <Widget>[
-                  new IconButton(
-                      icon: new Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      })
-                ],
-              )
-              );
-            },
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text('Connected', style: TextStyle(fontSize: 20)),
-                        Text('LastSync: 12:00AM',
-                            style: TextStyle(fontSize: 15)),
-                      ]),
-                  const Text.rich(TextSpan(
-                    style: TextStyle(color: Colors.green, fontSize: 20),
-                    children: <InlineSpan>[
-                      TextSpan(
-                          text: '93%',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      WidgetSpan(
-                          child: Icon(Icons.battery_full, color: Colors.green)),
-                    ],
-                  ))
-                ]),
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => new AlertDialog(
+                          title: new Text('Debug Info'),
+                          content: new Text('Stats are for nerds'),
+                          actions: <Widget>[
+                            new IconButton(
+                                icon: new Icon(Icons.close),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                })
+                          ],
+                        ));
+              },
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Connected', style: TextStyle(fontSize: 20)),
+                          Text('LastSync: 12:00AM',
+                              style: TextStyle(fontSize: 15)),
+                        ]),
+                    const Text.rich(TextSpan(
+                      style: TextStyle(color: Colors.green, fontSize: 20),
+                      children: <InlineSpan>[
+                        TextSpan(
+                            text: '93%',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        WidgetSpan(
+                            child:
+                                Icon(Icons.battery_full, color: Colors.green)),
+                      ],
+                    ))
+                  ]),
             ),
             const Divider(),
             Column(
@@ -105,7 +105,8 @@ class HomePage extends StatelessWidget {
                         itemCount: 6,
                         separatorBuilder: (context, _) =>
                             const SizedBox(width: 10),
-                        itemBuilder: (context, index) => buildItem(context, index),
+                        itemBuilder: (context, index) =>
+                            buildItem(context, index),
                       )),
                 ])
           ],
