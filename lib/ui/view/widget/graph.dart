@@ -1,44 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:tracer/models/data_packet.dart';
 
-class GraphPage extends StatelessWidget {
-  final bool isConnected = true;
-  const GraphPage({Key? key}) : super(key: key);
+class GraphWidget extends StatelessWidget {
+  const GraphWidget({Key? key}) : super(key: key);
 
-  List<charts.Series<Pair, DateTime>> _createSampleData() {
-    final data = [
-      Pair(DateTime(2017, 9, 19), 5),
-      Pair(DateTime(2017, 9, 26), 25),
-      Pair(DateTime(2017, 10, 3), 100),
-      Pair(DateTime(2017, 10, 10), 75),
-    ];
-
+  List<charts.Series<DataPacket, DateTime>> _createSampleData() {
     return [
-      charts.Series<Pair, DateTime>(
+      charts.Series<DataPacket, DateTime>(
         id: 'line',
         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-        domainFn: (Pair pair, _) => pair.x,
-        measureFn: (Pair pair, _) => pair.y,
-        data: data,
-      )
-    ];
-  }
-
-  List<charts.Series<Pair, String>> _createSampleDataBar() {
-    final data = [
-      Pair(DateTime(2017, 9, 19), 5),
-      Pair(DateTime(2017, 9, 26), 25),
-      Pair(DateTime(2017, 10, 3), 100),
-      Pair(DateTime(2017, 10, 10), 75),
-      Pair(DateTime(2017, 10, 11), 125),
-    ];
-
-    return [
-      charts.Series(
-        id: 'bar',
-        colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
-        domainFn: (Pair pair, _) => pair.x.toString(),
-        measureFn: (Pair pair, _) => pair.y,
+        domainFn: (DataPacket packet, _) => packet.timestamp,
+        measureFn: (DataPacket packet, _) => packet.value.toDouble(),
         data: data,
       )
     ];
@@ -104,11 +77,4 @@ class GraphPage extends StatelessWidget {
           ],
         ));
   }
-}
-
-class Pair {
-  final DateTime x;
-  final double y;
-
-  Pair(this.x, this.y);
 }
