@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/datapacket.dart';
+import '../models/data_packet.dart';
 
 class DataStore extends ChangeNotifier {
   final List<DataPacket> _notUploadedCache = [];

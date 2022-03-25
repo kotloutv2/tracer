@@ -1,10 +1,11 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:tracer/models/data_packet.dart';
 
 import '../models/user.dart';
 
-const _serverBaseUri = 'https://bastion.azurewebsites.net';
+const _serverBaseUri = 'bastion.azurewebsites.net';
 
 class Api {
   /// Get data for user with [email]. Avoid using for vitals.
@@ -17,7 +18,7 @@ class Api {
       uri = Uri.https(_serverBaseUri, '/api/user/patient/$email');
     }
 
-    final response = await http.get(uri);
+    var response = await http.get(uri);
 
     if (response.statusCode == 200) {
       return User.fromJson(jsonDecode(response.body));
@@ -40,7 +41,7 @@ class Api {
       uri = Uri.https(_serverBaseUri, '/api/user/auth/patient/login');
     }
 
-    final response =
+    var response =
         await http.post(uri, headers: {email: email, password: password});
 
     if (response.statusCode == 200) {
@@ -66,7 +67,7 @@ class Api {
       uri = Uri.https(_serverBaseUri, '/api/user/auth/patient/register');
     }
 
-    final response =
+    var response =
         await http.post(uri, headers: {email: email, password: password});
 
     if (response.statusCode == 200) {
@@ -79,18 +80,43 @@ class Api {
     throw Exception('Could not log in for $email.');
   }
 
-  static Future<Map<String, dynamic>> getVitals(String email) async {
-    final uri = Uri.https(_serverBaseUri, '/api/vitals/$email');
+  static Future<List<DataPacket>> getVitals(String email) async {
+    var data = <DataPacket>[];
 
-    final response = await http.get(uri);
+    var uri = Uri.https(_serverBaseUri, '/api/vitals/$email');
 
-    return jsonDecode(response.body);
+    var response = await http.get(uri);
+    Map<String, dynamic> json = jsonDecode(response.body);
+
+    if (json.containsKey('ppg')) {
+      List<dynamic> dataList = json['ppg'];
+      for (var element in dataList) {
+        data.add(DataPacket.fromJson(element, VitalsType.ppg));
+      }
+    }
+
+    if (json.containsKey('skinTemperature1')) {
+      List<dynamic> dataList = json['skinTemperature1'];
+      for (var element in dataList) {
+        data.add(DataPacket.fromJson(element, VitalsType.skinTemperature1));
+      }
+    }
+
+    if (json.containsKey('skinTemperature2')) {
+      List<dynamic> dataList = json['skinTemperature2'];
+      for (var element in dataList) {
+        data.add(DataPacket.fromJson(element, VitalsType.skinTemperature2));
+      }
+    }
+
+    return data;
+    // return
   }
 
   static Future<void> putVitals(String email) async {
-    final uri = Uri.https(_serverBaseUri, '/api/vitals/$email');
+    var uri = Uri.https(_serverBaseUri, '/api/vitals/$email');
 
-    final response = await http.get(uri);
+    var response = await http.get(uri);
 
     return jsonDecode(response.body);
   }

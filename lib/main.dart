@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'services/currentuser.dart';
-import 'services/datastore.dart';
+import 'services/current_user.dart';
+import 'services/data_store.dart';
 import 'ui/view/home.dart';
 import 'ui/view/login.dart';
 
