@@ -1,23 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final currentUserProvider = Provider<CurrentUser>((ref) => CurrentUser());
-
-enum UserType { admin, patient }
-
-class User {
-  String username;
-  UserType type;
-
-  String token;
-
-  String? name;
-
-  User(this.username, this.token, this.type);
-}
+import '../models/user.dart';
+import 'api.dart';
 
 class CurrentUser extends ChangeNotifier {
   User? _user;
@@ -40,7 +27,16 @@ class CurrentUser extends ChangeNotifier {
   }
 
   /// Load a user saved in current device's local storage
-  void _loadSavedUser() {}
+  void _loadSavedUser() async {
+    await SharedPreferences.getInstance().then((prefs) async {
+      var email = prefs.getString('email');
+      var name = prefs.getString('name');
+
+      if (email != null && name != null) {
+        _user = User(email: email, name: name);
+      }
+    });
+  }
 
   /// Load save user into current device's local storage
   void _saveUser() async {
@@ -49,44 +45,33 @@ class CurrentUser extends ChangeNotifier {
 
       await SharedPreferences.getInstance().then((prefs) async {
         var futures = [
-          prefs.setString('username', user.username),
-          prefs.setString('token', user.token)
+          prefs.setString('email', user.email),
+          prefs.setString('name', user.name),
         ];
 
-        futures.add(prefs.setString('name', user.name ?? ''));
+        futures.add(prefs.setString('name', user.name));
 
         await Future.wait(futures);
       });
     }
   }
 
-  void logIn(String username, String password) {
-    try {
-      if (username == 'asd' && password == 'asd') {
-        _user = User(username, password, UserType.admin);
-      }
-
-      _saveUser();
-    } catch (ex) {
+  void logIn(String username, String password, UserRole role) async {
+    await Api.logIn(username, password, role).catchError((error) {
       log('Logging in to user $username failed.',
           name: 'tracer.user.constructor');
 
       throw Exception('Could not log in.');
-    }
+    }).then((user) {
+      _user = user;
+      _saveUser();
+    });
   }
 
   void logOut() async {
     if (_user != null) {
-      // TODO: Send logout message
-
       await SharedPreferences.getInstance().then((prefs) async {
-        await Future.wait([
-          prefs.remove('username'),
-          prefs.remove('token'),
-          prefs.remove('email'),
-          prefs.remove('name')
-        ]);
-
+        await Future.wait([prefs.remove('email'), prefs.remove('name')]);
         user = null;
       });
     }
