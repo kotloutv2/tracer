@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'models/userdata.dart';
 import 'services/currentuser.dart';
 import 'services/datastore.dart';
 import 'ui/view/home.dart';
@@ -11,7 +12,7 @@ void main() {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<CurrentUser>(create: (_) => CurrentUser()),
-      Provider<DataStore>(create: (_) => DataStore())
+      ChangeNotifierProvider<DataStore>(create: (_) => DataStore())
     ],
     child: const App(),
   ));

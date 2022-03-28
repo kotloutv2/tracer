@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../services/datastore.dart';
 
 class HomePage extends StatelessWidget {
   final bool isConnected = true;
@@ -13,6 +16,8 @@ class HomePage extends StatelessWidget {
     var currentVitalsWidget = const Text('Current Vitals',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
 
+    final datastore = context.watch<DataStore>();
+    final downloadedCache = datastore.downloadedCache;
     return Scaffold(
         appBar: AppBar(
           title: const Text('RVMS'),
@@ -21,7 +26,7 @@ class HomePage extends StatelessWidget {
         drawer: Drawer(
             child: ListView(
           padding: EdgeInsets.zero,
-          children: const [
+          children:  [
             DrawerHeader(
               child: Text('Home Drawer'),
             ),
