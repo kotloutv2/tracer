@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:tracer/services/ble.dart';
 
 import 'services/current_user.dart';
 import 'services/data_store.dart';
@@ -8,10 +9,13 @@ import 'ui/view/home.dart';
 import 'ui/view/login.dart';
 
 void main() {
+  final currentUser = CurrentUser();
+
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider<CurrentUser>(create: (_) => CurrentUser()),
-      Provider<DataStore>(create: (_) => DataStore())
+      ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
+      Provider<DataStore>(create: (_) => DataStore(currentUser)),
+      Provider<BleService>(create: (_) => BleService())
     ],
     child: const App(),
   ));
@@ -24,19 +28,18 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     final _router = GoRouter(initialLocation: '/', routes: [
       GoRoute(
-        name: 'home',
-        path: '/',
-        builder: (context, state) => const HomePage(),
-        // redirect: (state) {
-        //   var currentUser = context.read<CurrentUser>();
+          name: 'home',
+          path: '/',
+          builder: (context, state) => const HomePage(),
+          redirect: (state) {
+            var currentUser = context.read<CurrentUser>();
 
-        //   if (currentUser.user == null) {
-        //     return state.namedLocation('home');
-        //   }
+            if (currentUser.user == null) {
+              return state.namedLocation('login');
+            }
 
-        //   return null;
-        // }
-      ),
+            return null;
+          }),
       GoRoute(
           name: 'login',
           path: '/login',

@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tracer/models/user.dart';
 
-import '../models/user.dart';
 import 'api.dart';
 
 class CurrentUser extends ChangeNotifier {
@@ -56,7 +56,7 @@ class CurrentUser extends ChangeNotifier {
     }
   }
 
-  void logIn(String username, String password, UserRole role) async {
+  Future<void> logIn(String username, String password, UserRole role) async {
     await Api.logIn(username, password, role).catchError((error) {
       log('Logging in to user $username failed.',
           name: 'tracer.user.constructor');

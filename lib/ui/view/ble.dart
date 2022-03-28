@@ -1,84 +1,58 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:provider/provider.dart';
+import 'package:tracer/services/ble.dart';
 
-class LogScreen extends StatefulWidget {
-  const LogScreen({Key? key}) : super(key: key);
+class BleConnectScreen extends StatefulWidget {
+  const BleConnectScreen({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-    return LogViewState();
+  State<BleConnectScreen> createState() => _BleConnectScreenState();
+}
+
+class _BleConnectScreenState extends State<BleConnectScreen> {
+  List<DiscoveredDevice> _devices = [];
+  @override
+  Widget build(BuildContext context) {
+    final bleService = context.read<BleService>();
+
+    final bleDeviceTiles = bleService.startScan();
+
+    return Scaffold(
+        body: Column(
+      children: [
+        StreamBuilder(
+          stream: bleDeviceTiles,
+          builder: (ctx, AsyncSnapshot<DiscoveredDevice?> snapshot) {
+            _devices.add(snapshot.data!);
+            return ListView.builder(itemBuilder: ((context, index) {
+              return DeviceButton.fromRvmsDevice(_devices[index]);
+            }));
+          },
+        )
+      ],
+    ));
   }
 }
 
-class LogViewState extends State<LogScreen> {
-  StreamController<String>? messageStream;
-  List<String> messages = [];
-  final bleManager = FlutterReactiveBle();
+class DeviceButton extends StatelessWidget {
+  DiscoveredDevice rvmsDevice;
 
-  late String deviceId;
-
-  @override
-  void initState() {
-    super.initState();
-    messageStream = StreamController.broadcast();
-
-    messageStream?.stream.listen((msg) => setState(() => messages.add(msg)));
-
-    // Set up ble device
-
-    bleManager.scanForDevices(withServices: [
-      Uuid.parse('6e400001-b5a3-f393-e0a9-e50e24dcca9e')
-    ]).listen((device) {
-      if (device.name == 'Echo RVMS') {
-        bleManager.connectToDevice(
-          id: device.id,
-          servicesWithCharacteristicsToDiscover: {
-            Uuid.parse('6e400001-b5a3-f393-e0a9-e50e24dcca9e'): [
-              Uuid.parse('6e400003-b5a3-f393-e0a9-e50e24dcca9e')
-            ]
-          },
-        );
-
-        deviceId = device.id;
-      }
-
-      final characteristic = QualifiedCharacteristic(
-          serviceId: Uuid.parse('6e400001-b5a3-f393-e0a9-e50e24dcca9e'),
-          characteristicId: Uuid.parse('6e400003-b5a3-f393-e0a9-e50e24dcca9e'),
-          deviceId: deviceId);
-
-      bleManager.subscribeToCharacteristic(characteristic).listen((data) {
-        print(String.fromCharCodes(data));
-        setState(() {
-          messages.add(String.fromCharCodes(data));
-        });
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    messageStream?.close();
-    messageStream = null;
-  }
+  DeviceButton.fromRvmsDevice(this.rvmsDevice, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text('BLE Data')),
-        body: Center(
-            child: ListView.builder(
-          itemBuilder: (ctx, idx) {
-            return _makeElement(idx);
-          },
-          itemCount: messages.length,
-        )));
-  }
+    final bleService = context.read<BleService>();
+    final connectionStatus = context.watch<ConnectionStatus>();
 
-  Widget _makeElement(int index) {
-    return Text(messages[index]);
+    return ElevatedButton(
+        onPressed: () {
+          bleService.connect(rvmsDevice);
+          if (connectionStatus == ConnectionStatus.connected ||
+              connectionStatus == ConnectionStatus.connecting) {
+            return;
+          }
+        },
+        child: Text(rvmsDevice.id));
   }
 }

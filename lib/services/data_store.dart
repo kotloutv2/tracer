@@ -1,38 +1,25 @@
 import 'package:flutter/foundation.dart';
-import 'dart:math';
-
-import '../models/data_packet.dart';
+import 'package:tracer/models/data_packet.dart';
+import 'package:tracer/services/api.dart';
+import 'package:tracer/services/current_user.dart';
 
 class DataStore extends ChangeNotifier {
-  final List<DataPacket> _notUploadedCache = [];
+  final Map<VitalsType, List<DataPacket>> _notUploadedCache = {};
+  final Map<VitalsType, List<DataPacket>> _downloadedCache = {};
 
-  final List<DataPacket> _downloadedCache = [];
+  final DataCollection _dataCache = DataCollection();
+
+  final CurrentUser _user;
 
   DateTime lastUpdateTime = DateTime.now();
 
-  DataStore() {}
+  DataStore(this._user);
 
-  void insertDatapoints(List<DataPacket> packets) {
-    _notUploadedCache.addAll(packets);
+  void insertDatapoints(VitalsType type, List<DataPacket> packets) {
+    _notUploadedCache[type]!.addAll(packets);
   }
 
-  double _randomTempValue() {
-    var random = Random();
-
-    const minVal = 36.0;
-    const maxVal = 37.5;
-
-    return random.nextDouble() * (maxVal - minVal) + minVal;
+  void fetchData() {
+    var vitals = Api.getVitals(_user.user!.email);
   }
-
-  // double _randomPpgValue() {
-  //   var random = Random();
-
-  //   const minVal = 8000;
-  //   const maxVal = 5000;
-
-  //   return random.nextDouble() * (maxVal - minVal) + minVal;
-  // }
-
-  void insertFakeData() {}
 }

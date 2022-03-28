@@ -3,15 +3,14 @@ enum VitalsType { ppg, skinTemperature1, skinTemperature2 }
 class DataPacket {
   final DateTime timestamp;
   final double value;
-  final VitalsType type;
 
-  const DataPacket(this.timestamp, this.value, this.type);
+  const DataPacket(this.timestamp, this.value);
 
-  factory DataPacket.fromJson(Map<String, dynamic> json, VitalsType type) {
+  factory DataPacket.fromJson(Map<String, dynamic> json) {
     String timestampString = json['timestamp'];
 
     return DataPacket(
-        DateTime.parse(timestampString), json['value'].toDouble(), type);
+        DateTime.parse(timestampString), json['value'].toDouble());
   }
 
   Map<String, dynamic> toJson() {
@@ -21,5 +20,63 @@ class DataPacket {
     data['value'] = value;
 
     return data;
+  }
+}
+
+class DataCollection {
+  final List<DataPacket> _ppgLocalData = [];
+  final List<DataPacket> _temp1LocalData = [];
+  final List<DataPacket> _temp2LocalData = [];
+
+  final List<DataPacket> _ppgCloudData = [];
+  final List<DataPacket> _temp1CloudData = [];
+  final List<DataPacket> _temp2CloudData = [];
+
+  List<DataPacket> get ppgData => _ppgCloudData + _ppgLocalData;
+  List<DataPacket> get temp1Data => _temp1CloudData + _temp2LocalData;
+  List<DataPacket> get temp2Data => _temp1CloudData + _temp2LocalData;
+
+  /// Convert only locally stored data to JSON
+  Map<String, dynamic> toJson() {
+    final output = {
+      'ppg': _ppgLocalData.map((element) => element.toJson()),
+      'skinTemperature1': _temp1LocalData.map((element) => element.toJson()),
+      'skinTemperature2': _temp2LocalData.map((element) => element.toJson())
+    };
+
+    return output;
+  }
+
+  /// Insert all data in JSON into list
+  void insertFromJson(Map<String, dynamic> json) {
+    if (json.containsKey('ppg')) {
+      List<Map<String, dynamic>> dataList = json['ppg'];
+      _ppgCloudData.addAll(dataList.map(DataPacket.fromJson));
+    }
+
+    if (json.containsKey('skinTemperature1')) {
+      List<Map<String, dynamic>> dataList = json['skinTemperature1'];
+      _temp1CloudData.addAll(dataList.map(DataPacket.fromJson));
+    }
+
+    if (json.containsKey('skinTemperature2')) {
+      List<Map<String, dynamic>> dataList = json['skinTemperature2'];
+
+      _temp2CloudData.addAll(dataList.map(DataPacket.fromJson));
+    }
+  }
+
+  void addData(VitalsType type, DataPacket packet) {
+    switch (type) {
+      case VitalsType.ppg:
+        _ppgLocalData.add(packet);
+        break;
+      case VitalsType.skinTemperature1:
+        _temp1LocalData.add(packet);
+        break;
+      case VitalsType.skinTemperature2:
+        _temp2LocalData.add(packet);
+        break;
+    }
   }
 }

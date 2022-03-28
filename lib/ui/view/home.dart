@@ -115,12 +115,9 @@ class HomePage extends StatelessWidget {
 
   Widget buildItem(BuildContext context, int index) {
     var items = [
-      buildCard('Heartrate', '98BPM', const Icon(Icons.favorite)),
+      // buildCard('Heartrate', '98BPM', const Icon(Icons.favorite)),
       buildCard('Temperature', '22.5°C', const Icon(Icons.whatshot)),
       buildCard('SPO2', '60%', const Icon(Icons.bloodtype)),
-      buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
-      buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
-      buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
     ];
     return Container(
         width: 120,

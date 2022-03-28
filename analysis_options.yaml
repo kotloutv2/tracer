@@ -9,3 +9,4 @@ linter:
     prefer_single_quotes: true
     sort_child_properties_last: true
     unawaited_futures: true
+    constant_identifier_names: false

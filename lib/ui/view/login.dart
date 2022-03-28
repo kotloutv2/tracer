@@ -1,6 +1,9 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:tracer/models/user.dart';
+import 'package:tracer/services/current_user.dart';
+import 'package:tracer/services/data_store.dart';
 
 class LoginRegisterPage extends StatelessWidget {
   final bool isLogin;
@@ -14,11 +17,17 @@ class LoginRegisterPage extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
 
+  final emailFormFieldController = TextEditingController();
+  final passwordFormFieldController = TextEditingController();
+  final nameFormFieldController = TextEditingController();
+
   LoginRegisterPage({Key? key, required this.isLogin}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var emailFormField = TextFormField(
+      controller: emailFormFieldController,
+      keyboardType: TextInputType.emailAddress,
       maxLength: _maxEmailLength,
       decoration: const InputDecoration(labelText: 'Email'),
       validator: (email) {
@@ -26,13 +35,14 @@ class LoginRegisterPage extends StatelessWidget {
           return 'Please enter an email';
         }
 
-        return EmailValidator.validate(email)
-            ? 'Please enter a valid email'
-            : null;
+        // return EmailValidator.validate(email)
+        //     ? 'Please enter a valid email'
+        //     : null;
       },
     );
 
     var passwordFormField = TextFormField(
+      controller: passwordFormFieldController,
       maxLength: _maxPasswordLength,
       decoration: const InputDecoration(labelText: 'Password'),
       obscureText: true,
@@ -48,6 +58,7 @@ class LoginRegisterPage extends StatelessWidget {
     );
 
     var nameFormField = TextFormField(
+      controller: nameFormFieldController,
       decoration: const InputDecoration(labelText: 'Name'),
       validator: (password) {
         if (password == null) {
@@ -58,10 +69,25 @@ class LoginRegisterPage extends StatelessWidget {
     );
 
     var saveButton = ElevatedButton(
-        onPressed: () {
-          if (_formKey.currentState!.validate()) {}
+        onPressed: () async {
+          if (_formKey.currentState!.validate()) {
+            final currentUser = context.read<CurrentUser>();
+            try {
+              await currentUser
+                  .logIn(emailFormFieldController.text,
+                      passwordFormFieldController.text, UserRole.patient)
+                  .then((_) {
+                var store = context.read<DataStore>();
+                store.fetchData();
+              });
+              context.go('home');
+            } catch (ex) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Unable to log in.')));
+            }
+          }
         },
-        child: const Text('Submit'));
+        child: isLogin ? const Text('Log In') : const Text('Register'));
 
     var loginInputWidgets = [emailFormField, passwordFormField, saveButton];
     var registerInputWidgets = [nameFormField, ...loginInputWidgets];
