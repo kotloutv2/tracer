@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/datapacket.dart';
+import '../../services/currentuser.dart';
 import '../../services/datastore.dart';
+import '../../ui/widgets/drawer.dart';
 
 class HomePage extends StatelessWidget {
   final bool isConnected = true;
@@ -10,46 +13,20 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var greetingWidget = const Text('HELLO, {NAME}!',
+    final datastore = context.watch<DataStore>();
+    final currentUser = context.watch<CurrentUser>();
+    var greetingWidget = Text('HELLO, ${currentUser.user?.name ?? "NAME"}!',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
 
     var currentVitalsWidget = const Text('Current Vitals',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
 
-    final datastore = context.watch<DataStore>();
-    final downloadedCache = datastore.downloadedCache;
     return Scaffold(
         appBar: AppBar(
           title: const Text('RVMS'),
           centerTitle: true,
         ),
-        drawer: Drawer(
-            child: ListView(
-          padding: EdgeInsets.zero,
-          children:  [
-            DrawerHeader(
-              child: Text('Home Drawer'),
-            ),
-            ListTile(
-              title: Text('Sync'),
-            ),
-            ListTile(
-              title: Text('Heartrate'),
-            ),
-            ListTile(
-              title: Text('SpO2'),
-            ),
-            ListTile(
-              title: Text('Temperature'),
-            ),
-            ListTile(
-              title: Text('Device Info'),
-            ),
-            ListTile(
-              title: Text('Log Out'),
-            )
-          ],
-        )),
+        drawer: Components.drawer(context),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -60,12 +37,12 @@ class HomePage extends StatelessWidget {
             onTap: () {
               showDialog(
               context: context,
-              builder: (BuildContext context) => new AlertDialog(
-                title: new Text('Debug Info'),
-                content: new Text('Stats are for nerds'),
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Debug Info'),
+                content: Text('Stats are for nerds'),
                 actions: <Widget>[
-                  new IconButton(
-                      icon: new Icon(Icons.close),
+                  IconButton(
+                      icon: Icon(Icons.close),
                       onPressed: () {
                         Navigator.pop(context);
                       })
@@ -102,7 +79,7 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   currentVitalsWidget,
-                  Divider(),
+                  const Divider(),
                   SizedBox(
                       height: 150,
                       child: ListView.separated(
@@ -110,22 +87,25 @@ class HomePage extends StatelessWidget {
                         itemCount: 6,
                         separatorBuilder: (context, _) =>
                             const SizedBox(width: 10),
-                        itemBuilder: (context, index) => buildItem(context, index),
+                        itemBuilder: (context, index) => buildItem(context, index, datastore),
                       )),
                 ])
           ],
         ));
   }
 
-  Widget buildItem(BuildContext context, int index) {
+  Widget buildItem(BuildContext context, int index, DataStore datastore) {
     var items = [
-      buildCard('Heartrate', '98BPM', const Icon(Icons.favorite)),
-      buildCard('Temperature', '22.5°C', const Icon(Icons.whatshot)),
-      buildCard('SPO2', '60%', const Icon(Icons.bloodtype)),
+      buildCard('Heartrate', '${datastore.downloadedCache[VitalsType.ppg]?.last.value.toString()}BPM', const Icon(Icons.favorite)),
+      buildCard('Temperature', '${datastore.downloadedCache[VitalsType.skinTemperature1]?.last.value.toString()}°C' , const Icon(Icons.whatshot)),
+      buildCard('SPO2', '${datastore.downloadedCache[VitalsType.skinTemperature2]?.last.value.toString()}%', const Icon(Icons.bloodtype)),
       buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
       buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
       buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
     ];
+
+    final vitalType = VitalsType.values[index];
+    
     return Container(
         width: 120,
         height: 50,
@@ -135,7 +115,7 @@ class HomePage extends StatelessWidget {
         ),
         child: InkWell(
           onTap: () {
-            context.push('/graph');
+            context.push('/graph', extra: vitalType);
           },
           child: items[index],
         ));

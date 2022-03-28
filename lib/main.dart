@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'models/userdata.dart';
+import 'models/datapacket.dart';
 import 'services/currentuser.dart';
 import 'services/datastore.dart';
+import 'ui/view/graph.dart';
 import 'ui/view/home.dart';
 import 'ui/view/login.dart';
 
@@ -50,6 +51,13 @@ class App extends StatelessWidget {
           builder: (context, state) => LoginRegisterPage(
                 isLogin: false,
               )),
+      GoRoute(
+          name: 'graph',
+          path: '/graph',
+          builder: (context, state) {
+            final vitalsType = state.extra! as VitalsType;
+            return GraphPage(vitalsType: vitalsType);
+          }),
     ]);
 
     return MaterialApp.router(
