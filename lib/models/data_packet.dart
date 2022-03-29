@@ -1,6 +1,6 @@
 enum VitalsType { ppg, skinTemperature1, skinTemperature2 }
 
-class DataPacket {
+class DataPacket implements Comparable<DataPacket> {
   final DateTime timestamp;
   final double value;
 
@@ -20,6 +20,11 @@ class DataPacket {
     data['value'] = value;
 
     return data;
+  }
+
+  @override
+  int compareTo(DataPacket other) {
+    return timestamp.compareTo(other.timestamp);
   }
 }
 

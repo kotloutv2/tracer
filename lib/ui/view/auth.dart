@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tracer/models/user.dart';
-import 'package:tracer/services/current_user.dart';
 import 'package:tracer/services/data_store.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:tracer/ui/viewmodel/auth.dart';
 
-class LoginRegisterPage extends StatelessWidget {
-  final bool isLogin;
-
+class AuthPage extends StatelessWidget {
   final _textFieldPadding = const EdgeInsets.all(8);
 
   final _minPasswordLength = 8;
@@ -21,10 +20,13 @@ class LoginRegisterPage extends StatelessWidget {
   final passwordFormFieldController = TextEditingController();
   final nameFormFieldController = TextEditingController();
 
-  LoginRegisterPage({Key? key, required this.isLogin}) : super(key: key);
+  AuthPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = context.watch<AuthViewModel>();
+    final isLogin = authViewModel.pageMode == AuthPageMode.LogIn;
+
     var emailFormField = TextFormField(
       controller: emailFormFieldController,
       keyboardType: TextInputType.emailAddress,
@@ -35,9 +37,9 @@ class LoginRegisterPage extends StatelessWidget {
           return 'Please enter an email';
         }
 
-        // return EmailValidator.validate(email)
-        //     ? 'Please enter a valid email'
-        //     : null;
+        return EmailValidator.validate(email)
+            ? null
+            : 'Please enter a valid email';
       },
     );
 
@@ -71,15 +73,9 @@ class LoginRegisterPage extends StatelessWidget {
     var saveButton = ElevatedButton(
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            final currentUser = context.read<CurrentUser>();
             try {
-              await currentUser
-                  .logIn(emailFormFieldController.text,
-                      passwordFormFieldController.text, UserRole.patient)
-                  .then((_) {
-                var store = context.read<DataStore>();
-                store.fetchData();
-              });
+              await authViewModel.logIn(emailFormFieldController.text,
+                  passwordFormFieldController.text);
               context.go('home');
             } catch (ex) {
               ScaffoldMessenger.of(context).showSnackBar(

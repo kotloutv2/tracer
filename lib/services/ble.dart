@@ -11,7 +11,7 @@ final _CHARACTERISTIC_UUIDS = [
 class BleService {
   static BleService? _bleService;
 
-  FlutterReactiveBle _bleManager = FlutterReactiveBle();
+  final FlutterReactiveBle _bleManager = FlutterReactiveBle();
 
   late Stream<DiscoveredDevice> _scanStream;
 

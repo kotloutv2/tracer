@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:tracer/ui/viewmodel/ble.dart';
+
+import '../../models/user.dart';
+import '../../services/data_store.dart';
+import '../viewmodel/auth.dart';
+import '../widget/app_drawer.dart';
 
 class HomePage extends StatelessWidget {
   final bool isConnected = true;
@@ -7,8 +14,15 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var greetingWidget = const Text('HELLO, {NAME}!',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
+    final currentUser =
+        context.select<AuthViewModel, User?>((viewModel) => viewModel.user);
+    final currentDevice = context.select<BleViewModel, DiscoveredDevice?>((viewModel) => viewModel.);
+    if (currentUser == null) {
+      context.go('login');
+    }
+
+    var greetingWidget = Text('HELLO, ${currentUser!.name}!',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
 
     var currentVitalsWidget = const Text('Current Vitals',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
@@ -18,39 +32,12 @@ class HomePage extends StatelessWidget {
           title: const Text('RVMS'),
           centerTitle: true,
         ),
-        drawer: Drawer(
-            child: ListView(
-          padding: EdgeInsets.zero,
-          children: const [
-            DrawerHeader(
-              child: Text('Home Drawer'),
-            ),
-            ListTile(
-              title: Text('Sync'),
-            ),
-            ListTile(
-              title: Text('Heartrate'),
-            ),
-            ListTile(
-              title: Text('SpO2'),
-            ),
-            ListTile(
-              title: Text('Temperature'),
-            ),
-            ListTile(
-              title: Text('Device Info'),
-            ),
-            ListTile(
-              title: Text('Log Out'),
-            )
-          ],
-        )),
+        drawer: AppDrawer(),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             greetingWidget,
             const Divider(),
-            //InkWell(
             GestureDetector(
               onTap: () {
                 showDialog(
@@ -114,10 +101,16 @@ class HomePage extends StatelessWidget {
   }
 
   Widget buildItem(BuildContext context, int index) {
+    final currentData = context.watch<Datastore>();
+
     var items = [
       // buildCard('Heartrate', '98BPM', const Icon(Icons.favorite)),
-      buildCard('Temperature', '22.5°C', const Icon(Icons.whatshot)),
-      buildCard('SPO2', '60%', const Icon(Icons.bloodtype)),
+      buildCard(
+          'Body Temperature',
+          '${currentData.getBodyTemperatures(currentUser.user)}°C',
+          const Icon(Icons.thermostat)),
+      buildCard('Ambient Temperature', '37°C', const Icon(Icons.air)),
+      // buildCard('SPO2', '60%', const Icon(Icons.bloodtype)),
     ];
     return Container(
         width: 120,

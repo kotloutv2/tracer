@@ -2,21 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tracer/services/ble.dart';
+import 'package:tracer/ui/viewmodel/auth.dart';
 
-import 'services/current_user.dart';
-import 'services/data_store.dart';
+import 'models/user.dart';
 import 'ui/view/home.dart';
-import 'ui/view/login.dart';
+import 'ui/view/auth.dart';
 
 void main() {
-  final currentUser = CurrentUser();
-
   runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider<CurrentUser>.value(value: currentUser),
-      Provider<DataStore>(create: (_) => DataStore(currentUser)),
-      Provider<BleService>(create: (_) => BleService())
-    ],
+    providers: [],
     child: const App(),
   ));
 }
@@ -26,15 +20,18 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser =
+        context.select<AuthViewModel, User?>(((viewModel) => viewModel.user));
+
+    final authViewModel = context.read<AuthViewModel>();
+
     final _router = GoRouter(initialLocation: '/', routes: [
       GoRoute(
           name: 'home',
           path: '/',
           builder: (context, state) => const HomePage(),
           redirect: (state) {
-            var currentUser = context.read<CurrentUser>();
-
-            if (currentUser.user == null) {
+            if (currentUser == null) {
               return state.namedLocation('login');
             }
 
@@ -43,15 +40,17 @@ class App extends StatelessWidget {
       GoRoute(
           name: 'login',
           path: '/login',
-          builder: (context, state) => LoginRegisterPage(
-                isLogin: true,
-              )),
+          builder: (context, state) {
+            authViewModel.pageMode = AuthPageMode.LogIn;
+            return AuthPage();
+          }),
       GoRoute(
           name: 'register',
           path: '/register',
-          builder: (context, state) => LoginRegisterPage(
-                isLogin: false,
-              )),
+          builder: (context, state) {
+            authViewModel.pageMode = AuthPageMode.Register;
+            return AuthPage();
+          }),
     ]);
 
     return MaterialApp.router(
