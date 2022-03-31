@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:tracer/services/ble.dart';
 
 import 'models/user.dart';
 import 'services/auth.dart';
-import 'ui/view/ble.dart';
-import 'ui/view/home.dart';
+import 'services/ble.dart';
 import 'ui/view/auth.dart';
+import 'ui/view/ble.dart';
+import 'ui/view/graph.dart';
+import 'ui/view/home.dart';
 
 void main() {
   runApp(MultiProvider(
@@ -60,7 +61,13 @@ class App extends StatelessWidget {
           path: '/bluetooth',
           builder: (context, state) {
             return const BleConnectScreen();
-          })
+          }),
+      GoRoute(
+          name: 'temp1Graph',
+          path: '/graph/temp1',
+          builder: (context, state) {
+            return const GraphPage();
+          }),
     ]);
 
     return MaterialApp.router(

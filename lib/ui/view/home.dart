@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 import '../../models/user.dart';
 import '../../services/auth.dart';
 import '../../services/ble.dart';
-import '../widget/app_drawer.dart';
+import '../widgets/app_drawer.dart';
+import '../../models/data_packet.dart';
 
 class HomePage extends StatelessWidget {
   final bool isConnected = false;
@@ -73,12 +74,53 @@ class HomePage extends StatelessWidget {
           title: const Text('RVMS'),
           centerTitle: true,
         ),
-        drawer: AppDrawer(),
+        drawer: const AppDrawer(),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             greetingWidget,
             const Divider(),
+            //InkWell(
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                          title: const Text('Debug Info'),
+                          content: const Text('Stats are for nerds'),
+                          actions: <Widget>[
+                            IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                })
+                          ],
+                        ));
+              },
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Connected', style: TextStyle(fontSize: 20)),
+                          Text('LastSync: 12:00AM',
+                              style: TextStyle(fontSize: 15)),
+                        ]),
+                    const Text.rich(TextSpan(
+                      style: TextStyle(color: Colors.green, fontSize: 20),
+                      children: <InlineSpan>[
+                        TextSpan(
+                            text: '93%',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        WidgetSpan(
+                            child:
+                                Icon(Icons.battery_full, color: Colors.green)),
+                      ],
+                    ))
+                  ]),
+            ),
             const Divider(),
             Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -103,14 +145,26 @@ class HomePage extends StatelessWidget {
   }
 
   Widget buildItem(BuildContext context, int index) {
-    // final currentData = context.watch<Datastore>();
-
     var items = [
-      // buildCard('Heartrate', '98BPM', const Icon(Icons.favorite)),
-      buildCard('Body Temperature', '3°C', const Icon(Icons.thermostat)),
-      buildCard('Ambient Temperature', '37°C', const Icon(Icons.air)),
-      buildCard('SPO2', '60%', const Icon(Icons.bloodtype)),
+      // buildCard(
+      //     'Heartrate',
+      //     '${datastore.downloadedCache[VitalsType.ppg]?.last.value.toString()}BPM',
+      //     const Icon(Icons.favorite)),
+      // buildCard(
+      //     'Temperature',
+      //     '${datastore.downloadedCache[VitalsType.skinTemperature1]?.last.value.toString()}°C',
+      //     const Icon(Icons.whatshot)),
+      // buildCard(
+      //     'SPO2',
+      //     '${datastore.downloadedCache[VitalsType.skinTemperature2]?.last.value.toString()}%',
+      //     const Icon(Icons.bloodtype)),
+      buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
+      buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
+      buildCard('Sample', 'Sample_Value', const Icon(Icons.adb)),
     ];
+
+    final vitalType = VitalsType.values[index];
+
     return Container(
         width: 120,
         height: 50,
@@ -120,7 +174,7 @@ class HomePage extends StatelessWidget {
         ),
         child: InkWell(
           onTap: () {
-            context.push('/graph');
+            context.push('/graph', extra: vitalType);
           },
           child: items[index],
         ));
