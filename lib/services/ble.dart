@@ -25,6 +25,9 @@ class BleService extends ChangeNotifier {
   StreamSubscription<ConnectionStateUpdate>? _connection;
   Stream<List<int>>? dataStream;
 
+  DeviceConnectionState deviceState = DeviceConnectionState.disconnected;
+  String? connectedDevice;
+
   // Host state
   late BleStatus hostStatus;
 
@@ -41,14 +44,11 @@ class BleService extends ChangeNotifier {
   void startScan() {
     _scanStream = _bleManager
         .scanForDevices(withServices: [_serviceUuid]).listen((device) {
-      if (device.name == _peripheralId) {
-        scanResults[device.id] = device;
-      }
+      scanResults[device.id] = device;
+      notifyListeners();
     }, onError: (e) {
       log('Scanning for devices errored: $e', name: 'tracer.ble.scan');
     });
-
-    notifyListeners();
   }
 
   Future<void> stopScan() async {
@@ -60,10 +60,16 @@ class BleService extends ChangeNotifier {
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _scanStream?.cancel();
+  void connectionStateHandler(ConnectionStateUpdate update) {
+    log('Device ${update.deviceId} connection state changed to: ${update.connectionState}',
+        name: 'tracer.ble.connectionStatus');
+    deviceState = update.connectionState;
+
+    if (deviceState == DeviceConnectionState.connected) {
+      connectedDevice = update.deviceId;
+    }
+
+    notifyListeners();
   }
 
   Future<void> connect(DiscoveredDevice device) async {
@@ -74,10 +80,7 @@ class BleService extends ChangeNotifier {
               _serviceUuid: _characteristicUuids
             },
             connectionTimeout: const Duration(seconds: 5))
-        .listen((update) {
-      log('Device ${device.id} connection state changed to: ${update.connectionState}',
-          name: 'tracer.ble.connectionStatus');
-    });
+        .listen(connectionStateHandler);
 
     dataStream = _bleManager.subscribeToCharacteristic(QualifiedCharacteristic(
         characteristicId: _characteristicUuids[0],
@@ -90,10 +93,18 @@ class BleService extends ChangeNotifier {
       try {
         _connection?.cancel();
         _connection = null;
+        connectedDevice = null;
+        notifyListeners();
       } on Exception catch (e, _) {
         log('Error disconnecting from device: $e',
             name: 'tracer.ble.disconnect');
       }
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scanStream?.cancel();
   }
 }

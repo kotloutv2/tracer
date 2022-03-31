@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tracer/services/ble.dart';
-import 'package:tracer/ui/viewmodel/auth.dart';
 
 import 'models/user.dart';
+import 'services/auth.dart';
+import 'ui/view/ble.dart';
 import 'ui/view/home.dart';
 import 'ui/view/auth.dart';
 
 void main() {
   runApp(MultiProvider(
-    providers: [],
+    providers: [
+      ChangeNotifierProvider(create: (context) => AuthService()),
+      ChangeNotifierProvider(create: (context) => BleService())
+    ],
     child: const App(),
   ));
 }
@@ -21,9 +25,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser =
-        context.select<AuthViewModel, User?>(((viewModel) => viewModel.user));
-
-    final authViewModel = context.read<AuthViewModel>();
+        context.select<AuthService, User?>(((auth) => auth.user));
 
     final _router = GoRouter(initialLocation: '/', routes: [
       GoRoute(
@@ -41,16 +43,24 @@ class App extends StatelessWidget {
           name: 'login',
           path: '/login',
           builder: (context, state) {
-            authViewModel.pageMode = AuthPageMode.LogIn;
-            return AuthPage();
+            return AuthPage(
+              isLogin: true,
+            );
           }),
       GoRoute(
           name: 'register',
           path: '/register',
           builder: (context, state) {
-            authViewModel.pageMode = AuthPageMode.Register;
-            return AuthPage();
+            return AuthPage(
+              isLogin: false,
+            );
           }),
+      GoRoute(
+          name: 'bluetooth',
+          path: '/bluetooth',
+          builder: (context, state) {
+            return const BleConnectScreen();
+          })
     ]);
 
     return MaterialApp.router(

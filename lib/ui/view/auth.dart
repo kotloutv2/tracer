@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:tracer/models/user.dart';
-import 'package:tracer/services/data_store.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:tracer/ui/viewmodel/auth.dart';
+
+import '../../services/auth.dart';
 
 class AuthPage extends StatelessWidget {
   final _textFieldPadding = const EdgeInsets.all(8);
@@ -20,12 +19,13 @@ class AuthPage extends StatelessWidget {
   final passwordFormFieldController = TextEditingController();
   final nameFormFieldController = TextEditingController();
 
-  AuthPage({Key? key}) : super(key: key);
+  final bool isLogin;
+
+  AuthPage({Key? key, this.isLogin = true}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = context.watch<AuthViewModel>();
-    final isLogin = authViewModel.pageMode == AuthPageMode.LogIn;
+    final authService = context.read<AuthService>();
 
     var emailFormField = TextFormField(
       controller: emailFormFieldController,
@@ -74,7 +74,7 @@ class AuthPage extends StatelessWidget {
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
             try {
-              await authViewModel.logIn(emailFormFieldController.text,
+              await authService.logIn(emailFormFieldController.text,
                   passwordFormFieldController.text);
               context.go('home');
             } catch (ex) {

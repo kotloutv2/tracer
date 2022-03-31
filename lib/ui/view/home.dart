@@ -1,31 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:tracer/ui/viewmodel/ble.dart';
 
 import '../../models/user.dart';
-import '../../services/data_store.dart';
-import '../viewmodel/auth.dart';
+import '../../services/auth.dart';
+import '../../services/ble.dart';
 import '../widget/app_drawer.dart';
 
 class HomePage extends StatelessWidget {
-  final bool isConnected = true;
+  final bool isConnected = false;
   const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final currentUser =
-        context.select<AuthViewModel, User?>((viewModel) => viewModel.user);
-    final currentDevice = context.select<BleViewModel, DiscoveredDevice?>((viewModel) => viewModel.);
+        context.select<AuthService, User?>((service) => service.user);
     if (currentUser == null) {
       context.go('login');
     }
 
-    var greetingWidget = Text('HELLO, ${currentUser!.name}!',
+    final deviceConnectionState =
+        context.select<BleService, DeviceConnectionState>(
+            (service) => service.deviceState);
+
+    final greetingWidget = Text('HELLO, ${currentUser!.name}!',
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
 
     var currentVitalsWidget = const Text('Current Vitals',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
+
+    var connectionStatusWidget = GestureDetector(
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+                  title: const Text('Debug Info'),
+                  content: const Text('Stats are for nerds'),
+                  actions: <Widget>[
+                    IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        })
+                  ],
+                ));
+      },
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('Connected', style: TextStyle(fontSize: 20)),
+                  Text('LastSync: 12:00AM', style: TextStyle(fontSize: 15)),
+                ]),
+            const Text.rich(TextSpan(
+              style: TextStyle(color: Colors.green, fontSize: 20),
+              children: <InlineSpan>[
+                TextSpan(
+                    text: '93%', style: TextStyle(fontWeight: FontWeight.bold)),
+                WidgetSpan(
+                    child: Icon(Icons.battery_full, color: Colors.green)),
+              ],
+            ))
+          ]),
+    );
 
     return Scaffold(
         appBar: AppBar(
@@ -38,46 +79,6 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             greetingWidget,
             const Divider(),
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) => AlertDialog(
-                          title: const Text('Debug Info'),
-                          content: const Text('Stats are for nerds'),
-                          actions: <Widget>[
-                            IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                })
-                          ],
-                        ));
-              },
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Connected', style: TextStyle(fontSize: 20)),
-                          Text('LastSync: 12:00AM',
-                              style: TextStyle(fontSize: 15)),
-                        ]),
-                    const Text.rich(TextSpan(
-                      style: TextStyle(color: Colors.green, fontSize: 20),
-                      children: <InlineSpan>[
-                        TextSpan(
-                            text: '93%',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        WidgetSpan(
-                            child:
-                                Icon(Icons.battery_full, color: Colors.green)),
-                      ],
-                    ))
-                  ]),
-            ),
             const Divider(),
             Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -85,11 +86,12 @@ class HomePage extends StatelessWidget {
                 children: [
                   currentVitalsWidget,
                   const Divider(),
+                  connectionStatusWidget,
                   SizedBox(
                       height: 150,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: 6,
+                        itemCount: 2,
                         separatorBuilder: (context, _) =>
                             const SizedBox(width: 10),
                         itemBuilder: (context, index) =>
@@ -101,16 +103,13 @@ class HomePage extends StatelessWidget {
   }
 
   Widget buildItem(BuildContext context, int index) {
-    final currentData = context.watch<Datastore>();
+    // final currentData = context.watch<Datastore>();
 
     var items = [
       // buildCard('Heartrate', '98BPM', const Icon(Icons.favorite)),
-      buildCard(
-          'Body Temperature',
-          '${currentData.getBodyTemperatures(currentUser.user)}°C',
-          const Icon(Icons.thermostat)),
+      buildCard('Body Temperature', '3°C', const Icon(Icons.thermostat)),
       buildCard('Ambient Temperature', '37°C', const Icon(Icons.air)),
-      // buildCard('SPO2', '60%', const Icon(Icons.bloodtype)),
+      buildCard('SPO2', '60%', const Icon(Icons.bloodtype)),
     ];
     return Container(
         width: 120,
@@ -129,7 +128,10 @@ class HomePage extends StatelessWidget {
 
   Widget buildCard(String name, String value, Icon icon) {
     return Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-      Text(name),
+      Text(
+        name,
+        textAlign: TextAlign.center,
+      ),
       icon,
       Text(value),
     ]);

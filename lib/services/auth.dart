@@ -1,22 +1,39 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tracer/models/user.dart';
 
+import '../models/user.dart';
 import 'api.dart';
 
-class AuthService {
-  Future<User> logIn(String email, String password, UserRole role) async {
-    final user = await Api.logIn(email, password, role).catchError((error) {
+class AuthService extends ChangeNotifier {
+  User? user;
+
+  AuthService() {
+    getSavedUser().then((savedUser) {
+      user = savedUser;
+      if (savedUser != null) {
+        notifyListeners();
+      }
+    });
+  }
+
+  Future<void> logIn(String email, String password) async {
+    final role = (Platform.isAndroid || Platform.isIOS)
+        ? UserRole.patient
+        : UserRole.admin;
+
+    await Api.logIn(email, password, role).then((user) {
+      this.user = user;
+      _saveUser(user);
+      notifyListeners();
+    }).catchError((error) {
       log('Logging in with email $email failed.',
           name: 'tracer.user.constructor');
 
       throw error;
     });
-
-    await _saveUser(user);
-
-    return user;
   }
 
   /// Load a user saved in current device's local storage

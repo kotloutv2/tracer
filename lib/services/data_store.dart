@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:tracer/models/data_packet.dart';
 import 'package:tracer/models/user.dart';
 import 'package:tracer/services/api.dart';
@@ -13,7 +12,7 @@ class Datastore {
   }
 
   void insertDatapoints(VitalsType type, List<DataPacket> packets) {
-    _dataCache.forEach((key, value) {
+    _dataCache.forEach((_, value) {
       for (final packet in packets) {
         value.addData(type, packet);
       }

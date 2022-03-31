@@ -10,49 +10,92 @@ class BleConnectScreen extends StatefulWidget {
   State<BleConnectScreen> createState() => _BleConnectScreenState();
 }
 
+// class BleDevice {
+//   String id;
+//   String name;
+
+//   BleDevice(this.id, this.name);
+// }
+
 class _BleConnectScreenState extends State<BleConnectScreen> {
-  List<DiscoveredDevice> _devices = [];
+  bool scanStarted = false;
+
   @override
   Widget build(BuildContext context) {
     final bleService = context.read<BleService>();
-
-    final bleDeviceTiles = bleService.startScan();
+    final bleDevices = bleService.scanResults;
 
     return Scaffold(
-        body: Column(
-      children: [
-        StreamBuilder(
-          stream: bleDeviceTiles,
-          builder: (ctx, AsyncSnapshot<DiscoveredDevice?> snapshot) {
-            _devices.add(snapshot.data!);
-            return ListView.builder(itemBuilder: ((context, index) {
-              return DeviceButton.fromRvmsDevice(_devices[index]);
-            }));
-          },
-        )
-      ],
-    ));
+        appBar: AppBar(
+          actions: [
+            IconButton(
+                onPressed: () {
+                  if (!scanStarted) {
+                    bleService.startScan();
+                  } else {
+                    bleService.stopScan();
+                  }
+                  setState(() {
+                    scanStarted = !scanStarted;
+                  });
+                },
+                icon: scanStarted
+                    ? const Icon(Icons.sync_disabled)
+                    : const Icon(Icons.sync))
+          ],
+        ),
+        body: Column(children: [
+          Expanded(
+              child: ListView.builder(
+                  itemCount: bleDevices.length,
+                  itemBuilder: ((context, index) {
+                    final key = bleDevices.keys.elementAt(index);
+                    return DeviceButton.fromDiscoveredDevice(bleDevices[key]!);
+                  }))),
+        ]));
   }
 }
 
 class DeviceButton extends StatelessWidget {
-  DiscoveredDevice rvmsDevice;
+  final DiscoveredDevice discoveredDevice;
 
-  DeviceButton.fromRvmsDevice(this.rvmsDevice, {Key? key}) : super(key: key);
+  const DeviceButton.fromDiscoveredDevice(this.discoveredDevice, {Key? key})
+      : super(key: key);
+
+  Icon getIcon(BleService bleService) {
+    if (bleService.connectedDevice != null &&
+        discoveredDevice.id == bleService.connectedDevice) {
+      return const Icon(Icons.bluetooth_connected);
+    }
+
+    return const Icon(Icons.bluetooth);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final bleService = context.read<BleService>();
-    final connectionStatus = context.watch<ConnectionStatus>();
+    final bleService = context.watch<BleService>();
 
-    return ElevatedButton(
-        onPressed: () {
-          bleService.connect(rvmsDevice);
-          if (connectionStatus == ConnectionStatus.connected ||
-              connectionStatus == ConnectionStatus.connecting) {
-            return;
+    final isEnabled =
+        (bleService.deviceState != DeviceConnectionState.connecting) ||
+            (bleService.deviceState != DeviceConnectionState.disconnecting);
+
+    return Card(
+        child: ListTile(
+      onTap: () async {
+        if (bleService.connectedDevice != null) {
+          if (bleService.connectedDevice != discoveredDevice.id) {
+            bleService.disconnect();
+            await bleService.connect(discoveredDevice);
           }
-        },
-        child: Text(rvmsDevice.id));
+        } else {
+          await bleService.connect(discoveredDevice);
+        }
+      },
+      enabled: isEnabled,
+      leading: getIcon(bleService),
+      title: Text(discoveredDevice.name),
+      subtitle: Text(discoveredDevice.id),
+      trailing: const Icon(Icons.more_vert),
+    ));
   }
 }
