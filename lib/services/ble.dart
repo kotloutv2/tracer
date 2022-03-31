@@ -1,65 +1,99 @@
-import 'dart:async';
+/// Based on code provided in
+/// https://github.com/PhilipsHue/flutter_reactive_ble/tree/master/example/lib/src/ble
 
+import 'dart:async';
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 
-const _PERIPHERAL_ID = 'Echo RVMS';
-final _SERVICE_UUID = Uuid.parse('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
-final _CHARACTERISTIC_UUIDS = [
+const _peripheralId = 'Echo RVMS';
+final _serviceUuid = Uuid.parse('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
+final _characteristicUuids = [
   Uuid.parse('6e400003-b5a3-f393-e0a9-e50e24dcca9e')
 ];
 
-class BleService {
-  static BleService? _bleService;
+class BleService extends ChangeNotifier {
+  final _bleManager = FlutterReactiveBle();
 
-  final FlutterReactiveBle _bleManager = FlutterReactiveBle();
+  // Scanning
+  var scanResults = <String, DiscoveredDevice>{};
+  StreamSubscription<DiscoveredDevice>? _scanStream;
+  bool get isScanning => _scanStream != null;
 
-  late Stream<DiscoveredDevice> _scanStream;
+  // Device Connection
+  StreamSubscription<ConnectionStateUpdate>? _connection;
+  Stream<List<int>>? dataStream;
 
-  var connectionStatus = DeviceConnectionState.disconnected;
+  // Host state
+  late BleStatus hostStatus;
 
-  final StreamController<List<int>> _messageStream =
-      StreamController.broadcast();
-
-  factory BleService() {
-    return _bleService ??= _bleService = BleService._();
-  }
-
-  /// Private constructor
-  BleService._() {
-    _scanStream = _bleManager.scanForDevices(
-        withServices: [_SERVICE_UUID], requireLocationServicesEnabled: true);
-  }
-
-  Stream<DiscoveredDevice> startScan() async* {
-    await for (final device in _scanStream) {
-      if (device.name == _PERIPHERAL_ID) {
-        yield device;
-      }
-    }
-  }
-
-  void connect(DiscoveredDevice device) {
-    final characteristic = QualifiedCharacteristic(
-        serviceId: _SERVICE_UUID,
-        characteristicId: _CHARACTERISTIC_UUIDS[0],
-        deviceId: device.id);
-
-    connectionStatus = DeviceConnectionState.connecting;
-
-    _bleManager.connectToDevice(
-      id: device.id,
-      servicesWithCharacteristicsToDiscover: {
-        _SERVICE_UUID: _CHARACTERISTIC_UUIDS
-      },
-    ).listen(connectionStateUpdate);
-
-    _bleManager.subscribeToCharacteristic(characteristic).listen((event) {
-      _messageStream.add(event);
-      print(String.fromCharCodes(event));
+  BleService() {
+    hostStatus = _bleManager.status;
+    _bleManager.statusStream.listen((status) {
+      hostStatus = status;
+      log('BLE Subsystem changed status to: $status',
+          name: 'tracer.ble.statusStream');
+      notifyListeners();
     });
   }
 
-  void connectionStateUpdate(ConnectionStateUpdate update) {
-    connectionStatus = update.connectionState;
+  void startScan() {
+    _scanStream = _bleManager
+        .scanForDevices(withServices: [_serviceUuid]).listen((device) {
+      if (device.name == _peripheralId) {
+        scanResults[device.id] = device;
+      }
+    }, onError: (e) {
+      log('Scanning for devices errored: $e', name: 'tracer.ble.scan');
+    });
+
+    notifyListeners();
+  }
+
+  Future<void> stopScan() async {
+    log('Stopping scan', name: 'tracer.ble.scan');
+
+    await _scanStream?.cancel().then((_) {
+      _scanStream = null;
+    });
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _scanStream?.cancel();
+  }
+
+  Future<void> connect(DiscoveredDevice device) async {
+    _connection = _bleManager
+        .connectToDevice(
+            id: device.id,
+            servicesWithCharacteristicsToDiscover: {
+              _serviceUuid: _characteristicUuids
+            },
+            connectionTimeout: const Duration(seconds: 5))
+        .listen((update) {
+      log('Device ${device.id} connection state changed to: ${update.connectionState}',
+          name: 'tracer.ble.connectionStatus');
+    });
+
+    dataStream = _bleManager.subscribeToCharacteristic(QualifiedCharacteristic(
+        characteristicId: _characteristicUuids[0],
+        serviceId: _serviceUuid,
+        deviceId: device.id));
+  }
+
+  void disconnect() {
+    if (_connection != null) {
+      try {
+        _connection?.cancel();
+        _connection = null;
+      } on Exception catch (e, _) {
+        log('Error disconnecting from device: $e',
+            name: 'tracer.ble.disconnect');
+      }
+    }
   }
 }
