@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 enum VitalsType { ppg, skinTemperature1, skinTemperature2 }
 
 class DataPacket implements Comparable<DataPacket> {

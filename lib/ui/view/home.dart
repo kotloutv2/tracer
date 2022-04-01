@@ -7,7 +7,6 @@ import '../../models/user.dart';
 import '../../services/auth.dart';
 import '../../services/ble.dart';
 import '../widgets/app_drawer.dart';
-import '../../models/data_packet.dart';
 
 class HomePage extends StatelessWidget {
   final bool isConnected = false;

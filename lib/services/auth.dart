@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import '../models/user.dart';
 import 'api.dart';
 
@@ -11,7 +13,11 @@ class AuthService extends ChangeNotifier {
   User? user;
 
   AuthService() {
+    print("constructor");
+
     getSavedUser().then((savedUser) {
+      print("savedUser");
+
       user = savedUser;
       if (savedUser != null) {
         notifyListeners();
@@ -20,9 +26,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logIn(String email, String password) async {
-    final role = (Platform.isAndroid || Platform.isIOS)
-        ? UserRole.patient
-        : UserRole.admin;
+    const role = kIsWeb ? UserRole.admin : UserRole.patient;
 
     await Api.logIn(email, password, role).then((user) {
       this.user = user;

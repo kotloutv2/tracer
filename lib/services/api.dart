@@ -36,17 +36,22 @@ class Api {
     Uri uri;
 
     if (role == UserRole.admin) {
-      uri = Uri.https(_serverBaseUri, '/api/user/auth/hcp/login');
+      uri = Uri.https(_serverBaseUri, '/api/user/auth/patient/login');
     } else {
       uri = Uri.https(_serverBaseUri, '/api/user/auth/patient/login');
     }
 
-    var response = await http.post(uri,
+    final response = await http.post(uri,
         headers: {
           'Content-type': 'application/json',
-          'Accept': 'application/json',
+          'Accept': 'application/json'
         },
         body: jsonEncode({'email': email, 'password': password}));
+
+    final response2 = await http
+        .get(Uri.https(_serverBaseUri, '/api/user/auth/patient/$email'));
+
+    print(response2.body);
 
     if (response.statusCode == 200) {
       return User.fromJson(jsonDecode(response.body));
