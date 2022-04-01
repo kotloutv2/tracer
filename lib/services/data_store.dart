@@ -1,14 +1,26 @@
-import 'package:tracer/models/data_packet.dart';
-import 'package:tracer/models/user.dart';
-import 'package:tracer/services/api.dart';
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:tracer/services/ble.dart';
 
-class Datastore {
+import '../models/data_packet.dart';
+import '../models/user.dart';
+import 'api.dart';
+
+class Datastore extends ChangeNotifier {
   late Map<String, DataCollection> _dataCache;
 
   DateTime lastUpdateTime = DateTime.now();
 
   Datastore() {
     _dataCache = {};
+  }
+
+  void startListening(Stream<List<int>>? bleStream) {
+    bleStream!.listen((data) {
+      var stringified = String.fromCharCodes(data);
+      var split = stringified.split(' ');
+      print(split.length);
+    });
   }
 
   void insertDatapoints(VitalsType type, List<DataPacket> packets) {

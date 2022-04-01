@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'models/user.dart';
 import 'services/auth.dart';
 import 'services/ble.dart';
+import 'services/data_store.dart';
 import 'ui/view/auth.dart';
 import 'ui/view/ble.dart';
 import 'ui/view/graph.dart';
@@ -14,7 +15,8 @@ void main() {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => AuthService()),
-      ChangeNotifierProvider(create: (context) => BleService())
+      ChangeNotifierProvider(create: (context) => BleService()),
+      ChangeNotifierProvider(create: (context) => Datastore())
     ],
     child: const App(),
   ));
@@ -32,7 +34,7 @@ class App extends StatelessWidget {
       GoRoute(
           name: 'home',
           path: '/',
-          builder: (context, state) => const HomePage(),
+          builder: (context, state) => const BleConnectScreen(),
           redirect: (state) {
             if (currentUser == null) {
               return state.namedLocation('login');

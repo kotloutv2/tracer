@@ -7,7 +7,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 
-const _peripheralId = 'Echo RVMS';
+// const _peripheralId = 'Echo RVMS';
 final _serviceUuid = Uuid.parse('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
 final _characteristicUuids = [
   Uuid.parse('6e400003-b5a3-f393-e0a9-e50e24dcca9e')
@@ -86,6 +86,8 @@ class BleService extends ChangeNotifier {
         characteristicId: _characteristicUuids[0],
         serviceId: _serviceUuid,
         deviceId: device.id));
+
+    notifyListeners();
   }
 
   void disconnect() {
@@ -94,6 +96,7 @@ class BleService extends ChangeNotifier {
         _connection?.cancel();
         _connection = null;
         connectedDevice = null;
+        dataStream?.drain();
         notifyListeners();
       } on Exception catch (e, _) {
         log('Error disconnecting from device: $e',
@@ -106,5 +109,6 @@ class BleService extends ChangeNotifier {
   void dispose() {
     super.dispose();
     _scanStream?.cancel();
+    _connection?.cancel();
   }
 }

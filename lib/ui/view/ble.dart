@@ -3,6 +3,8 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:provider/provider.dart';
 import 'package:tracer/services/ble.dart';
 
+import '../../services/data_store.dart';
+
 class BleConnectScreen extends StatefulWidget {
   const BleConnectScreen({Key? key}) : super(key: key);
 
@@ -74,6 +76,7 @@ class DeviceButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bleService = context.watch<BleService>();
+    final datastore = context.watch<Datastore>();
 
     final isEnabled =
         (bleService.deviceState != DeviceConnectionState.connecting) ||
@@ -86,9 +89,11 @@ class DeviceButton extends StatelessWidget {
           if (bleService.connectedDevice != discoveredDevice.id) {
             bleService.disconnect();
             await bleService.connect(discoveredDevice);
+            datastore.startListening(bleService.dataStream);
           }
         } else {
           await bleService.connect(discoveredDevice);
+          datastore.startListening(bleService.dataStream);
         }
       },
       enabled: isEnabled,
