@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:tracer/ui/view/home.dart';
 
 import 'models/user.dart';
 import 'services/auth.dart';
@@ -9,7 +10,6 @@ import 'services/data_store.dart';
 import 'ui/view/auth.dart';
 import 'ui/view/ble.dart';
 import 'ui/view/graph.dart';
-import 'ui/view/home.dart';
 
 void main() {
   runApp(MultiProvider(
@@ -34,7 +34,7 @@ class App extends StatelessWidget {
       GoRoute(
           name: 'home',
           path: '/',
-          builder: (context, state) => const BleConnectScreen(),
+          builder: (context, state) => const HomePage(),
           redirect: (state) {
             if (currentUser == null) {
               return state.namedLocation('login');

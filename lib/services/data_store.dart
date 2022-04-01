@@ -1,6 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:tracer/services/ble.dart';
 
 import '../models/data_packet.dart';
 import '../models/user.dart';
@@ -15,20 +13,25 @@ class Datastore extends ChangeNotifier {
     _dataCache = {};
   }
 
-  void startListening(Stream<List<int>>? bleStream) {
+  void startListening(Stream<List<int>>? bleStream, User user) {
     bleStream!.listen((data) {
-      var stringified = String.fromCharCodes(data);
-      var split = stringified.split(' ');
-      print(split.length);
+      final stringified = String.fromCharCodes(data);
+      final split = stringified.split(' ');
+
+      final ppg = int.parse(split[0], radix: 16);
+      final temp1 = int.parse(split[1], radix: 16);
+      final temp2 = int.parse(split[2], radix: 16);
+
+      insertData(user, VitalsType.ppg, ppg.toDouble());
+      insertData(user, VitalsType.skinTemperature1, temp1.toDouble() / 100.0);
+      insertData(user, VitalsType.skinTemperature2, temp2.toDouble() / 100.0);
     });
   }
 
-  void insertDatapoints(VitalsType type, List<DataPacket> packets) {
-    _dataCache.forEach((_, value) {
-      for (final packet in packets) {
-        value.addData(type, packet);
-      }
-    });
+  void insertData(User user, VitalsType type, double value) {
+    _dataCache
+        .putIfAbsent(user.email, () => DataCollection())
+        .addData(type, DataPacket(DateTime.now(), value));
   }
 
   void fetchData(User user) async {
@@ -40,6 +43,9 @@ class Datastore extends ChangeNotifier {
   }
 
   List<DataPacket> getBodyTemperatures(User user) {
+    if (_dataCache[user.email] == null) {
+      return [];
+    }
     return _dataCache[user.email]!.temp1Data;
   }
 

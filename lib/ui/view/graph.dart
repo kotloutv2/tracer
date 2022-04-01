@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,9 +10,20 @@ import '../../services/data_store.dart';
 import '../../ui/widgets/app_drawer.dart';
 import '../../models/user.dart';
 
-class GraphPage extends StatelessWidget {
+class GraphPage extends StatefulWidget {
   // final VitalsType vitalsType;
   const GraphPage({Key? key}) : super(key: key);
+
+  @override
+  State<GraphPage> createState() => _GraphPageState();
+}
+
+class _GraphPageState extends State<GraphPage> {
+  @override
+  void initState() {
+    super.initState();
+    Timer.periodic(const Duration(seconds: 5), (Timer t) => setState(() {}));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,19 +43,22 @@ class GraphPage extends StatelessWidget {
           children: <Widget>[
             SizedBox(
                 height: 300,
-                /* child: new charts.BarChart( */
-                /*   _createSampleDataBar(), */
-                /* )), */
-                child: charts.TimeSeriesChart([
-                  charts.Series<DataPacket, DateTime>(
-                    id: 'line',
-                    colorFn: (_, __) =>
-                        charts.MaterialPalette.blue.shadeDefault,
-                    domainFn: (DataPacket packet, _) => packet.timestamp,
-                    measureFn: (DataPacket packet, _) => packet.value,
-                    data: data,
-                  )
-                ])),
+                child: charts.TimeSeriesChart(
+                  [
+                    charts.Series<DataPacket, DateTime>(
+                      id: 'line',
+                      colorFn: (_, __) =>
+                          charts.MaterialPalette.blue.shadeDefault,
+                      domainFn: (DataPacket packet, _) => packet.timestamp,
+                      measureFn: (DataPacket packet, _) => packet.value,
+                      data: data,
+                    )
+                  ],
+                  animate: true,
+                  primaryMeasureAxis: const charts.NumericAxisSpec(
+                      tickProviderSpec: charts.BasicNumericTickProviderSpec(
+                          dataIsInWholeNumbers: false, zeroBound: false)),
+                )),
             Expanded(
                 child: ListView.separated(
                     scrollDirection: Axis.vertical,
@@ -53,7 +69,7 @@ class GraphPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               Text(data[index].timestamp.toString()),
-                              const Text('Data'),
+                              Text('${data[index].value}'),
                             ])))
           ],
         ));

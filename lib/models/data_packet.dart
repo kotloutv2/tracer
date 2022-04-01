@@ -72,6 +72,7 @@ class DataCollection {
   }
 
   void addData(VitalsType type, DataPacket packet) {
+    print("Added data of type: $type with value: $packet");
     switch (type) {
       case VitalsType.ppg:
         _ppgLocalData.add(packet);

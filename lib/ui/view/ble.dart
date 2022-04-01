@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:provider/provider.dart';
+import 'package:tracer/services/auth.dart';
 import 'package:tracer/services/ble.dart';
 
 import '../../services/data_store.dart';
@@ -77,6 +78,7 @@ class DeviceButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bleService = context.watch<BleService>();
     final datastore = context.watch<Datastore>();
+    final currentUser = context.read<AuthService>().user!;
 
     final isEnabled =
         (bleService.deviceState != DeviceConnectionState.connecting) ||
@@ -89,11 +91,11 @@ class DeviceButton extends StatelessWidget {
           if (bleService.connectedDevice != discoveredDevice.id) {
             bleService.disconnect();
             await bleService.connect(discoveredDevice);
-            datastore.startListening(bleService.dataStream);
+            datastore.startListening(bleService.dataStream, currentUser);
           }
         } else {
           await bleService.connect(discoveredDevice);
-          datastore.startListening(bleService.dataStream);
+          datastore.startListening(bleService.dataStream, currentUser);
         }
       },
       enabled: isEnabled,
