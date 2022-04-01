@@ -94,8 +94,14 @@ class Api {
   static Future<void> putVitals(String email, DataCollection collection) async {
     var uri = Uri.https(_serverBaseUri, '/api/vitals/$email');
 
-    var response = await http.put(uri, body: collection.toJson());
+    var bodyTest = jsonEncode(collection);
 
-    return jsonDecode(response.body);
+    await http.put(uri,
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: bodyTest);
+    return;
   }
 }

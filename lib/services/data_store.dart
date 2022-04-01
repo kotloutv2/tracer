@@ -34,7 +34,7 @@ class Datastore extends ChangeNotifier {
         .addData(type, DataPacket(DateTime.now(), value));
   }
 
-  void fetchData(User user) async {
+  Future<void> fetchData(User user) async {
     await Api.getVitals(user.email).then((data) {
       _dataCache
           .putIfAbsent(user.email, () => DataCollection())
@@ -42,15 +42,16 @@ class Datastore extends ChangeNotifier {
     });
   }
 
+  Future<void> pushData(User user) async {
+    if (_dataCache[user.email] != null) {
+      await Api.putVitals(user.email, _dataCache[user.email]!);
+    }
+  }
+
   List<DataPacket> getBodyTemperatures(User user) {
     if (_dataCache[user.email] == null) {
       return [];
     }
     return _dataCache[user.email]!.temp1Data;
-  }
-
-  double getLatestAmbientTemperature(User user) {
-    var sortedTempData = _dataCache[user.email]!.temp2Data..sort();
-    return sortedTempData.last.value;
   }
 }

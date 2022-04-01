@@ -19,10 +19,13 @@ class GraphPage extends StatefulWidget {
 }
 
 class _GraphPageState extends State<GraphPage> {
+  late Timer updateTimer;
+
   @override
   void initState() {
     super.initState();
-    Timer.periodic(const Duration(seconds: 5), (Timer t) => setState(() {}));
+    updateTimer = Timer.periodic(
+        const Duration(seconds: 5), (Timer t) => setState(() {}));
   }
 
   @override
@@ -36,6 +39,13 @@ class _GraphPageState extends State<GraphPage> {
         appBar: AppBar(
           title: const Text('Graph View'),
           centerTitle: true,
+          actions: [
+            IconButton(
+                icon: const Icon(Icons.upload),
+                onPressed: () {
+                  datastore.pushData(currentUser);
+                })
+          ],
         ),
         drawer: const AppDrawer(),
         body: Column(
@@ -74,11 +84,10 @@ class _GraphPageState extends State<GraphPage> {
           ],
         ));
   }
-}
 
-class Pair {
-  final DateTime x;
-  final double y;
-
-  Pair(this.x, this.y);
+  @override
+  void dispose() {
+    updateTimer.cancel();
+    super.dispose();
+  }
 }

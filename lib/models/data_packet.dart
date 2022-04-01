@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum VitalsType { ppg, skinTemperature1, skinTemperature2 }
 
 class DataPacket implements Comparable<DataPacket> {
@@ -42,14 +44,12 @@ class DataCollection {
   List<DataPacket> get temp2Data => _temp1CloudData + _temp2LocalData;
 
   /// Convert only locally stored data to JSON
-  Map<String, dynamic> toJson() {
-    final output = {
-      'ppg': _ppgLocalData.map((element) => element.toJson()),
-      'skinTemperature1': _temp1LocalData.map((element) => element.toJson()),
-      'skinTemperature2': _temp2LocalData.map((element) => element.toJson())
+  Map<String, List<DataPacket>> toJson() {
+    return {
+      'ppg': _ppgLocalData,
+      'skinTemperature1': _temp1LocalData,
+      'skinTemperature2': _temp2LocalData,
     };
-
-    return output;
   }
 
   /// Insert all data in JSON into list
@@ -72,7 +72,6 @@ class DataCollection {
   }
 
   void addData(VitalsType type, DataPacket packet) {
-    print("Added data of type: $type with value: $packet");
     switch (type) {
       case VitalsType.ppg:
         _ppgLocalData.add(packet);
