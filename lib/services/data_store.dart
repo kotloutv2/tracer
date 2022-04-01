@@ -52,6 +52,6 @@ class Datastore extends ChangeNotifier {
     if (_dataCache[user.email] == null) {
       return [];
     }
-    return _dataCache[user.email]!.temp1Data;
+    return _dataCache[user.email]!.temp1Data.toList();
   }
 }

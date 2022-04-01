@@ -8,7 +8,7 @@ class DataPacket implements Comparable<DataPacket> {
 
   const DataPacket(this.timestamp, this.value);
 
-  factory DataPacket.fromJson(Map<String, dynamic> json) {
+  factory DataPacket.fromJson(dynamic json) {
     String timestampString = json['timestamp'];
 
     return DataPacket(
@@ -31,42 +31,41 @@ class DataPacket implements Comparable<DataPacket> {
 }
 
 class DataCollection {
-  final List<DataPacket> _ppgLocalData = [];
-  final List<DataPacket> _temp1LocalData = [];
-  final List<DataPacket> _temp2LocalData = [];
+  final Set<DataPacket> _ppgLocalData = {};
+  final Set<DataPacket> _temp1LocalData = {};
+  final Set<DataPacket> _temp2LocalData = {};
 
-  final List<DataPacket> _ppgCloudData = [];
-  final List<DataPacket> _temp1CloudData = [];
-  final List<DataPacket> _temp2CloudData = [];
+  final Set<DataPacket> _ppgCloudData = {};
+  final Set<DataPacket> _temp1CloudData = {};
+  final Set<DataPacket> _temp2CloudData = {};
 
-  List<DataPacket> get ppgData => _ppgCloudData + _ppgLocalData;
-  List<DataPacket> get temp1Data => _temp1CloudData + _temp2LocalData;
-  List<DataPacket> get temp2Data => _temp1CloudData + _temp2LocalData;
+  Set<DataPacket> get ppgData => _ppgCloudData.union(_ppgLocalData);
+  Set<DataPacket> get temp1Data => _temp1CloudData.union(_temp1LocalData);
+  Set<DataPacket> get temp2Data => _temp2CloudData.union(_temp2LocalData);
 
   /// Convert only locally stored data to JSON
   Map<String, List<DataPacket>> toJson() {
     return {
-      'ppg': _ppgLocalData,
-      'skinTemperature1': _temp1LocalData,
-      'skinTemperature2': _temp2LocalData,
+      'ppg': _ppgLocalData.toList(),
+      'skinTemperature1': _temp1LocalData.toList(),
+      'skinTemperature2': _temp2LocalData.toList(),
     };
   }
 
   /// Insert all data in JSON into list
   void insertFromJson(Map<String, dynamic> json) {
     if (json.containsKey('ppg')) {
-      List<Map<String, dynamic>> dataList = json['ppg'];
+      List<dynamic> dataList = json['ppg'];
       _ppgCloudData.addAll(dataList.map(DataPacket.fromJson));
     }
 
     if (json.containsKey('skinTemperature1')) {
-      List<Map<String, dynamic>> dataList = json['skinTemperature1'];
+      List<dynamic> dataList = json['skinTemperature1'];
       _temp1CloudData.addAll(dataList.map(DataPacket.fromJson));
     }
 
     if (json.containsKey('skinTemperature2')) {
-      List<Map<String, dynamic>> dataList = json['skinTemperature2'];
-
+      List<dynamic> dataList = json['skinTemperature2'];
       _temp2CloudData.addAll(dataList.map(DataPacket.fromJson));
     }
   }

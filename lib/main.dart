@@ -30,6 +30,11 @@ class App extends StatelessWidget {
     final currentUser =
         context.select<AuthService, User?>(((auth) => auth.user));
 
+    if (currentUser != null) {
+      final datastore = context.read<Datastore>();
+      datastore.fetchData(currentUser);
+    }
+
     final _router = GoRouter(initialLocation: '/', routes: [
       GoRoute(
           name: 'home',
