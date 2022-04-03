@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,11 +12,7 @@ class AuthService extends ChangeNotifier {
   User? user;
 
   AuthService() {
-    print("constructor");
-
     getSavedUser().then((savedUser) {
-      print("savedUser");
-
       user = savedUser;
       if (savedUser != null) {
         notifyListeners();

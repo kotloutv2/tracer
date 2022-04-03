@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../models/user.dart';
 import '../../services/auth.dart';
-import '../../services/ble.dart';
 import '../widgets/app_drawer.dart';
 
 class HomePage extends StatelessWidget {
@@ -20,9 +19,9 @@ class HomePage extends StatelessWidget {
       context.go('login');
     }
 
-    final deviceConnectionState =
-        context.select<BleService, DeviceConnectionState>(
-            (service) => service.deviceState);
+    // final deviceConnectionState =
+    //     context.select<BleService, DeviceConnectionState>(
+    //         (service) => service.deviceState);
 
     final greetingWidget = Text('HELLO, ${currentUser!.name}!',
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
@@ -70,9 +69,16 @@ class HomePage extends StatelessWidget {
     );
 
     var vitalsCards = [
-      buildCard('PPG', '', const Icon(Icons.favorite)),
-      buildCard('Temperature1', '37°C', const Icon(Icons.thermostat)),
-      buildCard('Temperature2', '37°C%', const Icon(Icons.thermostat)),
+      buildCard('PPG', '', const Icon(Icons.favorite), () {
+        context.push('/graph/ppg');
+      }),
+      buildCard('Skin Temperature', '37°C', const Icon(Icons.thermostat), () {
+        context.push('/graph/temp1');
+      }),
+      buildCard('Ambient Temperature', '37°C', const Icon(Icons.thermostat),
+          () {
+        context.push('/graph/temp2');
+      }),
     ];
 
     return Scaffold(
@@ -86,7 +92,7 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             greetingWidget,
             const Divider(),
-            connectionStatusWidget,
+            if (kIsWeb) connectionStatusWidget,
             Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -109,12 +115,7 @@ class HomePage extends StatelessWidget {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(25)),
                               ),
-                              child: InkWell(
-                                onTap: () {
-                                  context.push('/graph/temp1');
-                                },
-                                child: vitalsCards[index],
-                              ));
+                              child: vitalsCards[index]);
                         },
                       )),
                 ])
@@ -122,14 +123,19 @@ class HomePage extends StatelessWidget {
         ));
   }
 
-  Widget buildCard(String name, String value, Icon icon) {
-    return Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-      Text(
-        name,
-        textAlign: TextAlign.center,
-      ),
-      icon,
-      Text(value),
-    ]);
+  Widget buildCard(
+      String name, String value, Icon icon, void Function() onTap) {
+    return InkWell(
+      onTap: onTap,
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        Text(
+          name,
+          textAlign: TextAlign.center,
+        ),
+        icon,
+        Text(value),
+      ]),
+    );
   }
 }

@@ -48,11 +48,6 @@ class Api {
         },
         body: jsonEncode({'email': email, 'password': password}));
 
-    final response2 = await http
-        .get(Uri.https(_serverBaseUri, '/api/user/auth/patient/$email'));
-
-    print(response2.body);
-
     if (response.statusCode == 200) {
       return User.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 401) {

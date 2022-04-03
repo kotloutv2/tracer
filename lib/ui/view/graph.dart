@@ -12,7 +12,8 @@ import '../../models/user.dart';
 
 class GraphPage extends StatefulWidget {
   // final VitalsType vitalsType;
-  const GraphPage({Key? key}) : super(key: key);
+  final VitalsType type;
+  const GraphPage({Key? key, required this.type}) : super(key: key);
 
   @override
   State<GraphPage> createState() => _GraphPageState();
@@ -34,7 +35,19 @@ class _GraphPageState extends State<GraphPage> {
         context.select<AuthService, User?>((service) => service.user);
     final datastore = context.watch<Datastore>();
 
-    var data = datastore.getBodyTemperatures(currentUser!);
+    List<DataPacket> data;
+    switch (widget.type) {
+      case VitalsType.ppg:
+        data = datastore.getPpg(currentUser!);
+        break;
+      case VitalsType.skinTemperature1:
+        data = datastore.getBodyTemperatures(currentUser!);
+        break;
+      case VitalsType.skinTemperature2:
+        data = datastore.getAmbientTemperatures(currentUser!);
+        break;
+    }
+
     return Scaffold(
         appBar: AppBar(
           title: const Text('Graph View'),

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tracer/ui/view/home.dart';
 
+import 'models/data_packet.dart';
 import 'models/user.dart';
 import 'services/auth.dart';
 import 'services/ble.dart';
@@ -74,9 +75,11 @@ class App extends StatelessWidget {
               }),
           GoRoute(
               name: 'temp1Graph',
-              path: '/graph/temp1',
+              path: '/graph/:type',
               builder: (context, state) {
-                return const GraphPage();
+                final map = VitalsType.values.asNameMap();
+                final type = map[state.params['type']]!;
+                return GraphPage(type: type);
               }),
         ]);
 

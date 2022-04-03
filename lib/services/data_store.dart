@@ -54,4 +54,18 @@ class Datastore extends ChangeNotifier {
     }
     return _dataCache[user.email]!.temp1Data.toList();
   }
+
+  List<DataPacket> getAmbientTemperatures(User user) {
+    if (_dataCache[user.email] == null) {
+      return [];
+    }
+    return _dataCache[user.email]!.temp2Data.toList();
+  }
+
+  List<DataPacket> getPpg(User user) {
+    if (_dataCache[user.email] == null) {
+      return [];
+    }
+    return _dataCache[user.email]!.ppgData.toList();
+  }
 }
