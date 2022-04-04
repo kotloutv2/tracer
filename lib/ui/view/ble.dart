@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:provider/provider.dart';
-import 'package:tracer/services/auth.dart';
-import 'package:tracer/services/ble.dart';
 
+import '../../services/auth.dart';
+import '../../services/ble.dart';
 import '../../services/data_store.dart';
 
 class BleConnectScreen extends StatefulWidget {

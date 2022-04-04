@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tracer/services/auth.dart';
+import '../../services/auth.dart';
 
 import '../../models/data_packet.dart';
 import '../../services/data_store.dart';

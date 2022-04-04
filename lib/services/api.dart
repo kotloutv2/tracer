@@ -118,8 +118,14 @@ class Api {
     }
 
     final patientRequests =
-        patientsList.map((user) => getUser(email, UserRole.patient));
+        patientsList.map((user) => getUser(user, UserRole.patient));
 
     return Future.wait(patientRequests);
+  }
+
+  static Future<void> addPatient(String email, String patient) async {
+    final uri =
+        Uri.https(_serverBaseUri, '/api/user/hcp/$email/patients/$patient');
+    await http.put(uri);
   }
 }

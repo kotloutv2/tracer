@@ -4,33 +4,32 @@ import 'package:provider/provider.dart';
 
 import '../../models/data_packet.dart';
 import '../../models/user.dart';
-import '../../services/api.dart';
 import '../../services/data_store.dart';
+import '../widgets/app_drawer.dart';
 
 class UserVitals extends StatelessWidget {
-  final String email;
-  const UserVitals({Key? key, required this.email}) : super(key: key);
+  final User user;
+  const UserVitals({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final datastore = context.read<Datastore>();
 
-    final thisUser =
-        Api.getUser(email, UserRole.patient).then((User user) async {
-      await datastore.fetchData(user);
-      return user;
-    });
-
-    return FutureBuilder<User>(
-        future: thisUser,
+    return FutureBuilder<void>(
+        future: datastore.fetchData(user),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final user = snapshot.data!;
-            return Column(children: [
-              GraphWidget(data: datastore.getPpg(user)),
-              GraphWidget(data: datastore.getBodyTemperatures(user)),
-              GraphWidget(data: datastore.getAmbientTemperatures(user)),
-            ]);
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Scaffold(
+                appBar: AppBar(
+                  title: Text(user.name),
+                  centerTitle: true,
+                ),
+                drawer: const AppDrawer(),
+                body: Column(children: [
+                  GraphWidget(data: datastore.getPpg(user)),
+                  GraphWidget(data: datastore.getBodyTemperatures(user)),
+                  GraphWidget(data: datastore.getAmbientTemperatures(user)),
+                ]));
           }
           return const Center(
             child: CircularProgressIndicator(),

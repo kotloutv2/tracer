@@ -1,8 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:tracer/ui/view/home.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'models/data_packet.dart';
 import 'models/user.dart';
@@ -12,6 +11,7 @@ import 'services/data_store.dart';
 import 'ui/view/auth.dart';
 import 'ui/view/ble.dart';
 import 'ui/view/graph.dart';
+import 'ui/view/home.dart';
 import 'ui/view/user.dart';
 
 void main() {
@@ -83,10 +83,10 @@ class App extends StatelessWidget {
           }),
       GoRoute(
           name: 'user',
-          path: '/user/:email',
+          path: '/user',
           builder: (context, state) {
-            final email = state.params['email']!;
-            return UserVitals(email: email);
+            final user = state.extra as User;
+            return UserVitals(user: user);
           }),
     ]);
 

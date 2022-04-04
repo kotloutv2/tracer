@@ -71,4 +71,13 @@ class AuthService extends ChangeNotifier {
     user = null;
     notifyListeners();
   }
+
+  Future<List<User>> getPatientList() async {
+    return await Api.getPatients(user!.email);
+  }
+
+  Future<void> addPatientToList(String patient) async {
+    await Api.addPatient(user!.email, patient);
+    notifyListeners();
+  }
 }
