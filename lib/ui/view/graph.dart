@@ -26,7 +26,7 @@ class _GraphPageState extends State<GraphPage> {
   void initState() {
     super.initState();
     updateTimer = Timer.periodic(
-        const Duration(seconds: 5), (Timer t) => setState(() {}));
+        const Duration(seconds: 1), (Timer t) => setState(() {}));
   }
 
   @override
@@ -78,7 +78,14 @@ class _GraphPageState extends State<GraphPage> {
                     )
                   ],
                   animate: true,
+                  domainAxis: const charts.DateTimeAxisSpec(
+                      renderSpec: charts.SmallTickRendererSpec(
+                          labelStyle: charts.TextStyleSpec(
+                              color: charts.Color(r: 211, g: 95, b: 95)))),
                   primaryMeasureAxis: const charts.NumericAxisSpec(
+                      renderSpec: charts.SmallTickRendererSpec(
+                          labelStyle: charts.TextStyleSpec(
+                              color: charts.Color(r: 211, g: 95, b: 95))),
                       tickProviderSpec: charts.BasicNumericTickProviderSpec(
                           dataIsInWholeNumbers: false, zeroBound: false)),
                 )),

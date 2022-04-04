@@ -25,7 +25,7 @@ class _BleConnectScreenState extends State<BleConnectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bleService = context.read<BleService>();
+    final bleService = context.watch<BleService>();
     final bleDevices = bleService.scanResults;
 
     return Scaffold(

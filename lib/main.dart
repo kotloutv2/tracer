@@ -36,8 +36,8 @@ class App extends StatelessWidget {
       datastore.fetchData(currentUser);
     }
 
-    final _router = GoRouter(
-        initialLocation: '/',
+    final _router = GoRouter(initialLocation: '/', routes: [
+      GoRoute(
         redirect: (state) {
           if (currentUser == null) {
             return state.namedLocation('login');
@@ -45,46 +45,45 @@ class App extends StatelessWidget {
 
           return null;
         },
-        routes: [
-          GoRoute(
-            name: 'home',
-            path: '/',
-            builder: (context, state) => const HomePage(),
-          ),
-          GoRoute(
-              name: 'login',
-              path: '/login',
-              builder: (context, state) {
-                return AuthPage(
-                  isLogin: true,
-                );
-              }),
-          GoRoute(
-              name: 'register',
-              path: '/register',
-              builder: (context, state) {
-                return AuthPage(
-                  isLogin: false,
-                );
-              }),
-          GoRoute(
-              name: 'bluetooth',
-              path: '/bluetooth',
-              builder: (context, state) {
-                return const BleConnectScreen();
-              }),
-          GoRoute(
-              name: 'temp1Graph',
-              path: '/graph/:type',
-              builder: (context, state) {
-                final map = VitalsType.values.asNameMap();
-                final type = map[state.params['type']]!;
-                return GraphPage(type: type);
-              }),
-        ]);
+        name: 'home',
+        path: '/',
+        builder: (context, state) => const HomePage(),
+      ),
+      GoRoute(
+          name: 'login',
+          path: '/login',
+          builder: (context, state) {
+            return AuthPage(
+              isLogin: true,
+            );
+          }),
+      GoRoute(
+          name: 'register',
+          path: '/register',
+          builder: (context, state) {
+            return AuthPage(
+              isLogin: false,
+            );
+          }),
+      GoRoute(
+          name: 'bluetooth',
+          path: '/bluetooth',
+          builder: (context, state) {
+            return const BleConnectScreen();
+          }),
+      GoRoute(
+          name: 'temp1Graph',
+          path: '/graph/:type',
+          builder: (context, state) {
+            final map = VitalsType.values.asNameMap();
+            final type = map[state.params['type']]!;
+            return GraphPage(type: type);
+          }),
+    ]);
 
     return MaterialApp.router(
       title: 'RVMS Tracer',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       routeInformationParser: _router.routeInformationParser,
       routerDelegate: _router.routerDelegate,

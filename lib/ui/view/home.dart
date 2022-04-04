@@ -73,11 +73,11 @@ class HomePage extends StatelessWidget {
         context.push('/graph/ppg');
       }),
       buildCard('Skin Temperature', '37°C', const Icon(Icons.thermostat), () {
-        context.push('/graph/temp1');
+        context.push('/graph/skinTemperature1');
       }),
       buildCard('Ambient Temperature', '37°C', const Icon(Icons.thermostat),
           () {
-        context.push('/graph/temp2');
+        context.push('/graph/skinTemperature2');
       }),
     ];
 
@@ -92,7 +92,7 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             greetingWidget,
             const Divider(),
-            if (kIsWeb) connectionStatusWidget,
+            if (!kIsWeb) connectionStatusWidget,
             Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,

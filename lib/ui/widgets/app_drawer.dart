@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../services/auth.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -47,8 +50,15 @@ class AppDrawer extends StatelessWidget {
         const ListTile(
           title: Text('Device Info'),
         ),
-        const ListTile(
-          title: Text('Log Out'),
+        GestureDetector(
+          onTap: () {
+            final authService = context.read<AuthService>();
+
+            authService.logOut();
+          },
+          child: const ListTile(
+            title: Text('Log Out'),
+          ),
         )
       ],
     ));

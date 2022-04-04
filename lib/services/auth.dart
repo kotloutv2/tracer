@@ -62,4 +62,13 @@ class AuthService extends ChangeNotifier {
       await Future.wait(futures);
     });
   }
+
+  void logOut() async {
+    await SharedPreferences.getInstance().then((prefs) async {
+      await prefs.clear();
+    });
+
+    user = null;
+    notifyListeners();
+  }
 }
