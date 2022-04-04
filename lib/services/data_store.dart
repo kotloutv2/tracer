@@ -22,15 +22,17 @@ class Datastore extends ChangeNotifier {
       final temp1 = int.parse(split[1], radix: 16);
       final temp2 = int.parse(split[2], radix: 16);
 
-      insertData(user, VitalsType.ppg, ppg.toDouble());
-      insertData(user, VitalsType.skinTemperature1, temp1.toDouble() / 100.0);
-      insertData(user, VitalsType.skinTemperature2, temp2.toDouble() / 100.0);
+      insertData(user.email, VitalsType.ppg, ppg.toDouble());
+      insertData(
+          user.email, VitalsType.skinTemperature1, temp1.toDouble() / 100.0);
+      insertData(
+          user.email, VitalsType.skinTemperature2, temp2.toDouble() / 100.0);
     });
   }
 
-  void insertData(User user, VitalsType type, double value) {
+  void insertData(String email, VitalsType type, double value) {
     _dataCache
-        .putIfAbsent(user.email, () => DataCollection())
+        .putIfAbsent(email, () => DataCollection())
         .addData(type, DataPacket(DateTime.now(), value));
   }
 

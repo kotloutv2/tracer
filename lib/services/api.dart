@@ -36,7 +36,7 @@ class Api {
     Uri uri;
 
     if (role == UserRole.admin) {
-      uri = Uri.https(_serverBaseUri, '/api/user/auth/patient/login');
+      uri = Uri.https(_serverBaseUri, '/api/user/auth/hcp/login');
     } else {
       uri = Uri.https(_serverBaseUri, '/api/user/auth/patient/login');
     }
@@ -103,5 +103,23 @@ class Api {
         },
         body: bodyTest);
     return;
+  }
+
+  static Future<List<User>> getPatients(String email) async {
+    final uri = Uri.https(_serverBaseUri, '/api/user/hcp/$email/patients');
+
+    final response = await http.get(uri);
+
+    final patientsList =
+        (jsonDecode(response.body) as List<dynamic>).cast<String>();
+
+    if (patientsList.isEmpty) {
+      return [];
+    }
+
+    final patientRequests =
+        patientsList.map((user) => getUser(email, UserRole.patient));
+
+    return Future.wait(patientRequests);
   }
 }

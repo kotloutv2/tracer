@@ -76,10 +76,10 @@ class AuthPage extends StatelessWidget {
             try {
               await authService.logIn(emailFormFieldController.text,
                   passwordFormFieldController.text);
-              context.go('home');
+              context.goNamed('home');
             } catch (ex) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Unable to log in.')));
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(ex.toString())));
             }
           }
         },
@@ -117,12 +117,12 @@ class AuthPage extends StatelessWidget {
             isLogin
                 ? TextButton(
                     onPressed: () {
-                      context.go(context.namedLocation('register'));
+                      context.goNamed('register');
                     },
                     child: const Text('Create an account?'))
                 : TextButton(
                     onPressed: () {
-                      context.go(context.namedLocation('login'));
+                      context.goNamed('login');
                     },
                     child: const Text('Log in instead.'))
           ]),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tracer/ui/view/home.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'models/data_packet.dart';
 import 'models/user.dart';
@@ -11,6 +12,7 @@ import 'services/data_store.dart';
 import 'ui/view/auth.dart';
 import 'ui/view/ble.dart';
 import 'ui/view/graph.dart';
+import 'ui/view/user.dart';
 
 void main() {
   runApp(MultiProvider(
@@ -31,7 +33,7 @@ class App extends StatelessWidget {
     final currentUser =
         context.select<AuthService, User?>(((auth) => auth.user));
 
-    if (currentUser != null) {
+    if (currentUser != null && !kIsWeb) {
       final datastore = context.read<Datastore>();
       datastore.fetchData(currentUser);
     }
@@ -72,12 +74,19 @@ class App extends StatelessWidget {
             return const BleConnectScreen();
           }),
       GoRoute(
-          name: 'temp1Graph',
+          name: 'graphs',
           path: '/graph/:type',
           builder: (context, state) {
             final map = VitalsType.values.asNameMap();
             final type = map[state.params['type']]!;
             return GraphPage(type: type);
+          }),
+      GoRoute(
+          name: 'user',
+          path: '/user/:email',
+          builder: (context, state) {
+            final email = state.params['email']!;
+            return UserVitals(email: email);
           }),
     ]);
 
