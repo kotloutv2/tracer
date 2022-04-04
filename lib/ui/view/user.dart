@@ -25,11 +25,13 @@ class UserVitals extends StatelessWidget {
                   centerTitle: true,
                 ),
                 drawer: const AppDrawer(),
-                body: Column(children: [
-                  GraphWidget(data: datastore.getPpg(user)),
-                  GraphWidget(data: datastore.getBodyTemperatures(user)),
-                  GraphWidget(data: datastore.getAmbientTemperatures(user)),
-                ]));
+                body: ListView(
+                  children: [
+                    GraphWidget(data: datastore.getPpg(user)),
+                    GraphWidget(data: datastore.getBodyTemperatures(user)),
+                    GraphWidget(data: datastore.getAmbientTemperatures(user)),
+                  ],
+                ));
           }
           return const Center(
             child: CircularProgressIndicator(),
